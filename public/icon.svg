@@ -2,21 +2,44 @@
   <!-- Background -->
   <rect width="512" height="512" rx="80" fill="#6A9E82"/>
 
-  <!-- Fork: tines -->
-  <rect x="172" y="88" width="14" height="96" rx="7" fill="white"/>
-  <rect x="196" y="88" width="14" height="96" rx="7" fill="white"/>
-  <rect x="220" y="88" width="14" height="96" rx="7" fill="white"/>
-  <!-- Fork: collar -->
-  <rect x="168" y="182" width="74" height="20" rx="10" fill="white"/>
-  <!-- Fork: handle -->
-  <rect x="190" y="200" width="26" height="220" rx="13" fill="white"/>
+  <!-- Steam wisps -->
+  <path d="M 200,162 C 192,142 208,120 200,100" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.75"/>
+  <path d="M 256,155 C 248,132 264,110 256,88" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.65"/>
+  <path d="M 312,162 C 320,142 304,120 312,100" stroke="white" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.75"/>
 
-  <!-- Knife: blade -->
-  <path d="M 294 88 L 314 88 C 314 88 326 130 314 208 L 294 208 Z" fill="white" opacity="0.9"/>
-  <!-- Knife: handle -->
-  <rect x="294" y="206" width="22" height="220" rx="11" fill="white"/>
+  <!-- Legs -->
+  <rect x="152" y="388" width="28" height="58" rx="14" fill="#2C2418"/>
+  <rect x="242" y="394" width="28" height="52" rx="14" fill="#2C2418"/>
+  <rect x="332" y="388" width="28" height="58" rx="14" fill="#2C2418"/>
 
-  <!-- Leaf / herb accent (right) -->
-  <ellipse cx="362" cy="148" rx="18" ry="34" fill="white" opacity="0.35" transform="rotate(-30 362 148)"/>
-  <ellipse cx="375" cy="108" rx="14" ry="26" fill="white" opacity="0.25" transform="rotate(-20 375 108)"/>
+  <!-- Pot body -->
+  <ellipse cx="256" cy="318" rx="152" ry="136" fill="#F7F3EE"/>
+
+  <!-- Subtle shading on left -->
+  <ellipse cx="200" cy="318" rx="60" ry="120" fill="#E0D8CE" opacity="0.45"/>
+
+  <!-- Handles -->
+  <path d="M 104,274 C 68,274 68,346 104,346" stroke="#DDD5C8" stroke-width="26" fill="none" stroke-linecap="round"/>
+  <path d="M 408,274 C 444,274 444,346 408,346" stroke="#DDD5C8" stroke-width="26" fill="none" stroke-linecap="round"/>
+
+  <!-- Pot rim -->
+  <ellipse cx="256" cy="226" rx="156" ry="22" fill="#C8BEB2"/>
+
+  <!-- Lid -->
+  <ellipse cx="256" cy="210" rx="152" ry="44" fill="#C47A5A"/>
+  <!-- Lid highlight -->
+  <ellipse cx="238" cy="196" rx="100" ry="24" fill="#D48A6A" opacity="0.5"/>
+
+  <!-- Lid knob -->
+  <circle cx="256" cy="174" r="26" fill="#C47A5A"/>
+  <circle cx="248" cy="166" r="13" fill="#D48A6A" opacity="0.55"/>
+
+  <!-- Small herb sprig on pot body -->
+  <g transform="translate(256,318)" opacity="0.55">
+    <line x1="0" y1="28" x2="0" y2="-18" stroke="#6A9E82" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="-14" cy="8" rx="12" ry="6" fill="#6A9E82" transform="rotate(-35,-14,8)"/>
+    <ellipse cx="14" cy="8" rx="12" ry="6" fill="#6A9E82" transform="rotate(35,14,8)"/>
+    <ellipse cx="-8" cy="-8" rx="10" ry="5" fill="#5A8E72" transform="rotate(-20,-8,-8)"/>
+    <ellipse cx="8" cy="-8" rx="10" ry="5" fill="#5A8E72" transform="rotate(20,8,-8)"/>
+  </g>
 </svg>

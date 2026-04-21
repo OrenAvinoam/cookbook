@@ -5,11 +5,26 @@ import RecipeCard from "./components/RecipeCard";
 import RecipeDetail from "./components/RecipeDetail";
 import RecipeForm from "./components/RecipeForm";
 import TagManager from "./components/TagManager";
+import LoginPage from "./components/LoginPage";
 import "./App.css";
 
 const CATEGORIES = ["all", "breakfast", "lunch", "dinner", "snack", "dessert"];
 
+function BotanicalSprig() {
+  return (
+    <svg width="72" height="36" viewBox="0 0 72 36" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+      <line x1="36" y1="34" x2="36" y2="6" stroke="#C47A5A" strokeWidth="1.5" strokeLinecap="round"/>
+      <ellipse cx="22" cy="20" rx="10" ry="5" fill="#6A9E82" opacity="0.85" transform="rotate(-35 22 20)"/>
+      <ellipse cx="50" cy="20" rx="10" ry="5" fill="#6A9E82" opacity="0.85" transform="rotate(35 50 20)"/>
+      <ellipse cx="27" cy="10" rx="9" ry="4.5" fill="#5A8E72" opacity="0.75" transform="rotate(-20 27 10)"/>
+      <ellipse cx="45" cy="10" rx="9" ry="4.5" fill="#5A8E72" opacity="0.75" transform="rotate(20 45 10)"/>
+      <ellipse cx="36" cy="6" rx="7" ry="4" fill="#6A9E82" opacity="0.7"/>
+    </svg>
+  );
+}
+
 export default function App() {
+  const [session, setSession] = useState(undefined);
   const [recipes, setRecipes] = useState([]);
   const [tags, setTags] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -20,7 +35,15 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (session) fetchAll();
+  }, [session]);
 
   async function fetchAll() {
     setLoading(true);
@@ -89,6 +112,17 @@ export default function App() {
     if (selectedTagId === id) setSelectedTagId(null);
   }
 
+  // Auth loading
+  if (session === undefined) {
+    return (
+      <div style={{ background: t.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: sans, fontSize: "13px", color: t.inkFaint }}>Loading…</p>
+      </div>
+    );
+  }
+
+  if (!session) return <LoginPage />;
+
   const selectedRecipe = recipes.find((r) => r.id === selected);
   const inList = !selected && !adding;
 
@@ -98,24 +132,29 @@ export default function App() {
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
-        <div style={{ borderBottom: `1px solid ${t.border}`, padding: "32px 28px 24px", background: t.surface }}>
+        <div style={{ background: t.ink, padding: "28px 28px 22px", borderBottom: `3px solid ${t.terra}` }}>
           <div style={{ maxWidth: "860px", margin: "0 auto" }}>
-            <p style={{ fontSize: "11px", color: t.green, fontFamily: sans, letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 6px 0" }}>a personal collection</p>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "12px" }}>
-              <div>
-                <h1 style={{ fontSize: "clamp(28px, 6vw, 48px)", fontWeight: "400", color: t.ink, margin: "0 0 4px 0", fontFamily: serif, letterSpacing: "0.01em" }}>
-                  Oren's Cookbook
-                </h1>
-                <p style={{ fontSize: "11px", color: t.terra, fontFamily: sans, letterSpacing: "0.2em", textTransform: "uppercase", margin: 0 }}>
-                  Collagen · Skin Health · Carnivore Protocol
-                </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+                <div>
+                  <p style={{ fontSize: "10px", color: t.green, fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0" }}>a personal collection</p>
+                  <h1 style={{ fontSize: "clamp(24px, 5vw, 40px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em" }}>
+                    Oren's Cookbook
+                  </h1>
+                  <p style={{ fontSize: "10px", color: t.terra, fontFamily: sans, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0 }}>
+                    Collagen · Skin Health · Carnivore Protocol
+                  </p>
+                </div>
+                <div style={{ opacity: 0.9, flexShrink: 0 }}>
+                  <BotanicalSprig />
+                </div>
               </div>
               {inList && (
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => setShowTagManager(true)} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 14px", borderRadius: "20px", cursor: "pointer" }}>
+                  <button onClick={() => setShowTagManager(true)} style={{ background: "transparent", border: `1px solid rgba(221,213,200,0.35)`, color: "#DDD5C8", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 14px", borderRadius: "20px", cursor: "pointer" }}>
                     Tags
                   </button>
-                  <button onClick={() => setAdding(true)} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                  <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
                     + New recipe
                   </button>
                 </div>

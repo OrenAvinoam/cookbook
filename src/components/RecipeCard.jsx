@@ -41,7 +41,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
         <div style={{ display: "flex", gap: "16px", flexShrink: 0 }}>
           {[{ l: "Prep", v: recipe.prep_time }, { l: "Cook", v: recipe.cook_time }, { l: "Serves", v: recipe.servings }].map((s, i) => (
             <div key={i} style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "12px", color: t.inkMid, fontFamily: sans, fontWeight: "500" }}>{s.v}</div>
+              <div style={{ fontSize: "13px", color: t.inkMid, fontFamily: serif }}>{s.v}</div>
               <div style={{ fontSize: "9px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.12em", textTransform: "uppercase" }}>{s.l}</div>
             </div>
           ))}

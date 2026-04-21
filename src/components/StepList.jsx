@@ -27,7 +27,7 @@ export default function StepList({ steps, accentColor }) {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0, transition: "background 0.2s, color 0.2s",
               }}>{i + 1}</span>
-              <span style={{ fontSize: "14px", color: isOpen ? t.ink : t.inkMid, fontFamily: serif, flex: 1, transition: "color 0.2s" }}>{step.title}</span>
+              <span style={{ fontSize: "11px", color: isOpen ? t.ink : t.inkMid, fontFamily: sans, textTransform: "uppercase", letterSpacing: "0.14em", flex: 1, transition: "color 0.2s" }}>{step.title}</span>
               {step.time && step.time !== "—" && <span style={{ fontSize: "11px", color: t.inkFaint, fontFamily: sans, flexShrink: 0 }}>{step.time}</span>}
               <span style={{ fontSize: "11px", color: t.inkFaint }}>{isOpen ? "▲" : "▼"}</span>
             </div>

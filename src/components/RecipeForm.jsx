@@ -2,6 +2,7 @@ import { useState } from "react";
 import { t, serif, sans } from "../theme";
 import { titleCase, sentenceCase } from "../lib/capitalize";
 import EmojiPicker from "./EmojiPicker";
+import TimeInput from "./TimeInput";
 
 const CATEGORIES = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 const PRESET_UNITS = ["g", "kg", "ml", "L", "tbsp", "tsp", "cup", "oz", "lb", "pcs", "pinch", "sprig", "clove", "slice", "bunch"];
@@ -185,9 +186,9 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
         {sectionHeader("Timing & servings")}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))", gap: "12px" }}>
           <Field label="Servings"><TextInput value={form.servings} onChange={(v) => set("servings", v)} placeholder="8" /></Field>
-          <Field label="Prep time"><TextInput value={form.prep_time} onChange={(v) => set("prep_time", v)} placeholder="45 min" /></Field>
-          <Field label="Cook time"><TextInput value={form.cook_time} onChange={(v) => set("cook_time", v)} placeholder="2h 30min" /></Field>
-          <Field label="Total time"><TextInput value={form.total_time} onChange={(v) => set("total_time", v)} placeholder="~4 hours" /></Field>
+          <Field label="Prep time"><TimeInput value={form.prep_time} onChange={(v) => set("prep_time", v)} /></Field>
+          <Field label="Cook time"><TimeInput value={form.cook_time} onChange={(v) => set("cook_time", v)} /></Field>
+          <Field label="Total time"><TimeInput value={form.total_time} onChange={(v) => set("total_time", v)} /></Field>
         </div>
         <Field label="Daily dose / serving suggestion">
           <TextInput value={form.dose} onChange={(v) => set("dose", v)} placeholder="e.g. 300ml daily, warm" />

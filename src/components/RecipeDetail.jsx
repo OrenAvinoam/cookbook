@@ -120,24 +120,24 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
       </div>
 
       <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "12px", padding: "32px", marginBottom: "24px", boxShadow: "0 2px 16px rgba(0,0,0,0.04)" }}>
-        <div style={{ display: "flex", gap: "16px", alignItems: "flex-start", marginBottom: "16px", flexWrap: "wrap" }}>
-          <span style={{ fontSize: "56px", lineHeight: 1 }}>{recipe.emoji}</span>
-          <div style={{ flex: 1, minWidth: "200px" }}>
-            <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "10px" }}>
-              {recipe.category && (
-                <span style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
-                  {recipe.category}
-                </span>
-              )}
-              {recipeTags.map((tag) => (
-                <span key={tag.id} style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: tag.color, background: tag.color + "18", border: `1px solid ${tag.color}40`, padding: "3px 8px", borderRadius: "20px" }}>
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-            <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: "0 0 10px 0", fontFamily: serif }}>{recipe.title}</h1>
-            <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
+        <div style={{ marginBottom: "16px" }}>
+          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
+            {recipe.category && (
+              <span style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
+                {recipe.category}
+              </span>
+            )}
+            {recipeTags.map((tag) => (
+              <span key={tag.id} style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: tag.color, background: tag.color + "18", border: `1px solid ${tag.color}40`, padding: "3px 8px", borderRadius: "20px" }}>
+                {tag.name}
+              </span>
+            ))}
           </div>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "10px" }}>
+            <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center" }}>{recipe.emoji}</span>
+            <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h1>
+          </div>
+          <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px" }}>
@@ -149,7 +149,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
             { l: "Daily dose", v: recipe.dose },
           ].filter((s) => s.v).map((s, i, arr) => (
             <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : "none", minWidth: "80px" }}>
-              <div style={{ fontSize: "13px", color: t.ink, fontFamily: sans, fontWeight: "500" }}>{s.v}</div>
+              <div style={{ fontSize: "13px", color: t.ink, fontFamily: serif }}>{s.v}</div>
               <div style={{ fontSize: "9px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
             </div>
           ))}

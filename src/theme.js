@@ -13,5 +13,5 @@ export const t = {
   inkFaint: "#B5A898",
 };
 
-export const serif = "Georgia, 'Times New Roman', serif";
+export const serif = "'EB Garamond', Georgia, 'Times New Roman', serif";
 export const sans = "'Helvetica Neue', Arial, sans-serif";

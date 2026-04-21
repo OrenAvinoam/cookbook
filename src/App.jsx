@@ -106,7 +106,7 @@ export default function App() {
                 <h1 style={{ fontSize: "clamp(28px, 6vw, 48px)", fontWeight: "400", color: t.ink, margin: "0 0 4px 0", fontFamily: serif, letterSpacing: "0.01em" }}>
                   Oren's Cookbook
                 </h1>
-                <p style={{ fontSize: "14px", color: t.terra, fontFamily: serif, fontStyle: "italic", margin: 0, letterSpacing: "0.02em" }}>
+                <p style={{ fontSize: "11px", color: t.terra, fontFamily: sans, letterSpacing: "0.2em", textTransform: "uppercase", margin: 0 }}>
                   Collagen · Skin Health · Carnivore Protocol
                 </p>
               </div>

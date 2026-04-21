@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { t, serif, sans } from "../theme";
 import { titleCase, sentenceCase } from "../lib/capitalize";
+import EmojiPicker from "./EmojiPicker";
 
 const CATEGORIES = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 const PRESET_UNITS = ["g", "kg", "ml", "L", "tbsp", "tsp", "cup", "oz", "lb", "pcs", "pinch", "sprig", "clove", "slice", "bunch"];
@@ -136,7 +137,7 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
             />
           </Field>
           <Field label="Emoji">
-            <TextInput value={form.emoji} onChange={(v) => set("emoji", v)} placeholder="🍽️" style={{ width: "64px" }} />
+            <EmojiPicker value={form.emoji} onChange={(v) => set("emoji", v)} />
           </Field>
         </div>
 

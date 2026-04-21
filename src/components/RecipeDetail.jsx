@@ -136,7 +136,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
               ))}
             </div>
             <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: "0 0 10px 0", fontFamily: serif }}>{recipe.title}</h1>
-            <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: sans, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
+            <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
           </div>
         </div>
 

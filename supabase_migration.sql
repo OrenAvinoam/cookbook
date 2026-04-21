@@ -1,4 +1,5 @@
 -- Run this in your Supabase SQL Editor (after the initial supabase_setup.sql)
+-- Safe to re-run if you got the policy error the first time
 
 -- Add new columns to recipes
 alter table recipes add column if not exists category text default 'other';
@@ -13,6 +14,9 @@ create table if not exists tags (
   color text default '#6A9E82'
 );
 alter table tags enable row level security;
+
+-- Drop and recreate policy (safe if already exists)
+drop policy if exists "Allow all" on tags;
 create policy "Allow all" on tags for all using (true) with check (true);
 
 -- Update seed recipe categories

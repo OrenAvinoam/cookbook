@@ -5,13 +5,80 @@ import StepList from "./StepList";
 import NoteList from "./NoteList";
 import NutritionLabel from "./NutritionLabel";
 import RecipeForm from "./RecipeForm";
-import { analyzeNutrition } from "../lib/nutrition";
+
+const NUTRITION_FIELDS = [
+  { key: "calories",     label: "Calories",          unit: "kcal" },
+  { key: "totalFat",     label: "Total Fat",          unit: "g" },
+  { key: "saturatedFat", label: "Saturated Fat",      unit: "g" },
+  { key: "transFat",     label: "Trans Fat",          unit: "g" },
+  { key: "cholesterol",  label: "Cholesterol",        unit: "mg" },
+  { key: "sodium",       label: "Sodium",             unit: "mg" },
+  { key: "totalCarb",    label: "Total Carbohydrate", unit: "g" },
+  { key: "fiber",        label: "Dietary Fiber",      unit: "g" },
+  { key: "sugars",       label: "Total Sugars",       unit: "g" },
+  { key: "protein",      label: "Protein",            unit: "g" },
+  { key: "vitaminD",     label: "Vitamin D",          unit: "mcg" },
+  { key: "calcium",      label: "Calcium",            unit: "mg" },
+  { key: "iron",         label: "Iron",               unit: "mg" },
+  { key: "potassium",    label: "Potassium",          unit: "mg" },
+];
+
+const emptyNutrition = Object.fromEntries(NUTRITION_FIELDS.map((f) => [f.key, ""]));
+
+function NutritionForm({ initial, onSave, onCancel }) {
+  const [vals, setVals] = useState(
+    initial ? Object.fromEntries(NUTRITION_FIELDS.map((f) => [f.key, initial[f.key] ?? ""])) : emptyNutrition
+  );
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const nutrition = Object.fromEntries(
+      NUTRITION_FIELDS.map((f) => [f.key, vals[f.key] === "" ? null : Number(vals[f.key])])
+    );
+    try { await onSave(nutrition); } finally { setSaving(false); }
+  };
+
+  return (
+    <div>
+      <p style={{ fontFamily: sans, fontSize: "12px", color: t.inkFaint, margin: "0 0 16px 0", lineHeight: 1.6 }}>
+        Enter per-serving values. Leave blank for any you don't have.
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px", marginBottom: "20px" }}>
+        {NUTRITION_FIELDS.map((f) => (
+          <div key={f.key}>
+            <label style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "3px" }}>
+              {f.label} <span style={{ opacity: 0.6 }}>({f.unit})</span>
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={vals[f.key]}
+              onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))}
+              style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 10px", outline: "none", boxSizing: "border-box" }}
+            />
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: "8px" }}>
+        <button onClick={handleSave} disabled={saving} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "8px 20px", borderRadius: "20px", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.7 : 1 }}>
+          {saving ? "Saving…" : "Save nutrition"}
+        </button>
+        {onCancel && (
+          <button onClick={onCancel} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "8px 16px", borderRadius: "20px", cursor: "pointer" }}>
+            Cancel
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete }) {
   const [tab, setTab] = useState("ingredients");
   const [editing, setEditing] = useState(false);
-  const [analyzingNutrition, setAnalyzingNutrition] = useState(false);
-  const [nutritionError, setNutritionError] = useState(null);
+  const [editingNutrition, setEditingNutrition] = useState(false);
 
   const recipeTags = (recipe.tag_ids || [])
     .map((id) => tags.find((tg) => tg.id === id))
@@ -20,17 +87,9 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
   const accentColor = recipeTags[0]?.color || t.green;
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
 
-  async function handleAnalyzeNutrition() {
-    setAnalyzingNutrition(true);
-    setNutritionError(null);
-    try {
-      const nutrition = await analyzeNutrition(recipe.title, recipe.ingredients, recipe.servings);
-      await onSave({ ...recipe, nutrition });
-    } catch (e) {
-      setNutritionError(e.message);
-    } finally {
-      setAnalyzingNutrition(false);
-    }
+  async function handleSaveNutrition(nutrition) {
+    await onSave({ ...recipe, nutrition });
+    setEditingNutrition(false);
   }
 
   if (editing) {
@@ -88,7 +147,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
             { l: "Total", v: recipe.total_time },
             { l: "Servings", v: recipe.servings },
             { l: "Daily dose", v: recipe.dose },
-          ].filter(s => s.v).map((s, i, arr) => (
+          ].filter((s) => s.v).map((s, i, arr) => (
             <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : "none", minWidth: "80px" }}>
               <div style={{ fontSize: "13px", color: t.ink, fontFamily: sans, fontWeight: "500" }}>{s.v}</div>
               <div style={{ fontSize: "9px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
@@ -99,7 +158,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
 
       <div style={{ display: "flex", borderBottom: `2px solid ${t.border}`, marginBottom: "20px" }}>
         {tabs.map((tb) => (
-          <button key={tb} onClick={() => setTab(tb)} style={{
+          <button key={tb} onClick={() => { setTab(tb); setEditingNutrition(false); }} style={{
             padding: "10px 20px", background: "transparent", border: "none",
             borderBottom: tab === tb ? `2px solid ${accentColor}` : "2px solid transparent",
             marginBottom: "-2px", color: tab === tb ? accentColor : t.inkFaint,
@@ -117,25 +176,20 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
         {tab === "notes" && <NoteList notes={recipe.notes} accentColor={accentColor} />}
         {tab === "nutrition" && (
           <div>
-            {recipe.nutrition ? (
+            {editingNutrition || !recipe.nutrition ? (
+              <NutritionForm
+                initial={recipe.nutrition}
+                onSave={handleSaveNutrition}
+                onCancel={recipe.nutrition ? () => setEditingNutrition(false) : null}
+              />
+            ) : (
               <div>
                 <NutritionLabel nutrition={recipe.nutrition} servings={recipe.servings} />
-                <button onClick={handleAnalyzeNutrition} disabled={analyzingNutrition} style={{ marginTop: "16px", background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: analyzingNutrition ? "wait" : "pointer" }}>
-                  {analyzingNutrition ? "Recalculating…" : "Recalculate"}
+                <button onClick={() => setEditingNutrition(true)} style={{ marginTop: "16px", background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>
+                  Edit nutrition
                 </button>
-              </div>
-            ) : (
-              <div style={{ textAlign: "center", padding: "40px 0" }}>
-                <p style={{ fontFamily: sans, fontSize: "13px", color: t.inkLight, marginBottom: "16px" }}>
-                  No nutrition data yet. Click below to calculate from your ingredients.
-                </p>
-                <button onClick={handleAnalyzeNutrition} disabled={analyzingNutrition} style={{ background: accentColor, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "9px 20px", borderRadius: "20px", cursor: analyzingNutrition ? "wait" : "pointer", opacity: analyzingNutrition ? 0.7 : 1 }}>
-                  {analyzingNutrition ? "Calculating…" : "Calculate nutrition"}
-                </button>
-                <p style={{ fontFamily: sans, fontSize: "11px", color: t.inkFaint, marginTop: "10px" }}>Requires Edamam API keys configured on Vercel</p>
               </div>
             )}
-            {nutritionError && <p style={{ fontFamily: sans, fontSize: "12px", color: "#C47A5A", marginTop: "12px" }}>{nutritionError}</p>}
           </div>
         )}
       </div>

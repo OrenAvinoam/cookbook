@@ -1,0 +1,13 @@
+{
+  "name": "Oren's Cookbook",
+  "short_name": "Cookbook",
+  "description": "A personal carnivore recipe collection",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F3EE",
+  "theme_color": "#6A9E82",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

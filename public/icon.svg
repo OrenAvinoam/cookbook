@@ -1,35 +1,61 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="100" fill="#2C2418"/>
 
-  <!-- Spatula (behind) rotate +40deg -->
-  <g transform="translate(256,256) rotate(40)">
-    <!-- Head + shoulder -->
-    <path d="M-44,-188 L44,-188 L44,-82 L12,-60 L12,-48 L-12,-48 L-12,-60 L-44,-82 Z" fill="#C47A5A"/>
-    <!-- Head top highlight -->
-    <rect x="-38" y="-182" width="76" height="16" rx="4" fill="#D4896A" opacity="0.45"/>
-    <!-- Slots -->
-    <rect x="-30" y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
-    <rect x="-7"  y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
-    <rect x="16"  y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
-    <!-- Handle -->
-    <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#C47A5A"/>
-    <!-- Sage grip band -->
-    <rect x="-12" y="62" width="24" height="52" fill="#6A9E82" opacity="0.55"/>
-    <!-- End knob -->
-    <ellipse cx="0" cy="182" rx="14" ry="11" fill="#B36848"/>
+  <!-- Drop shadow -->
+  <rect x="76" y="48" width="384" height="440" rx="14" fill="#111" opacity="0.4"/>
+
+  <!-- Page edges (right side stacked) -->
+  <rect x="442" y="40" width="14" height="434" rx="2" fill="#F0EBE3" opacity="0.85"/>
+  <rect x="446" y="42" width="10" height="430" rx="1" fill="#E0D8CC" opacity="0.6"/>
+  <line x1="443" y1="110" x2="456" y2="110" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
+  <line x1="443" y1="220" x2="456" y2="220" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
+  <line x1="443" y1="330" x2="456" y2="330" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
+  <line x1="443" y1="405" x2="456" y2="405" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Spine (dark copper) -->
+  <rect x="66" y="38" width="58" height="438" rx="10" fill="#7A3820"/>
+  <rect x="70" y="38" width="22" height="438" rx="8" fill="#C47A5A" opacity="0.25"/>
+  <!-- Spine ribs -->
+  <rect x="68" y="102" width="54" height="10" rx="3" fill="#9A4A28" opacity="0.7"/>
+  <rect x="68" y="118" width="54" height="5"  rx="2" fill="#9A4A28" opacity="0.5"/>
+  <rect x="68" y="388" width="54" height="10" rx="3" fill="#9A4A28" opacity="0.7"/>
+  <rect x="68" y="403" width="54" height="5"  rx="2" fill="#9A4A28" opacity="0.5"/>
+
+  <!-- Front cover -->
+  <rect x="114" y="38" width="332" height="438" rx="8" fill="#C47A5A"/>
+  <!-- Cover sheen top -->
+  <rect x="114" y="38" width="332" height="68" rx="8" fill="#D4896A" opacity="0.32"/>
+  <!-- Binding groove -->
+  <rect x="116" y="38" width="7" height="438" fill="#A05030" opacity="0.45"/>
+
+  <!-- Cover border frame (cream) -->
+  <rect x="136" y="60" width="292" height="396" rx="7" fill="none" stroke="#F0EBE3" stroke-width="4" opacity="0.3"/>
+  <!-- Inner border frame (sage) -->
+  <rect x="144" y="68" width="276" height="380" rx="5" fill="none" stroke="#6A9E82" stroke-width="2" opacity="0.22"/>
+
+  <!-- Crossed utensils on cover (cream + sage) -->
+
+  <!-- Spatula (cream, behind) -->
+  <g transform="translate(282,258) scale(0.52) rotate(38)">
+    <path d="M-44,-188 L44,-188 L44,-82 L12,-60 L12,-48 L-12,-48 L-12,-60 L-44,-82 Z" fill="#F0EBE3" opacity="0.9"/>
+    <rect x="-38" y="-182" width="76" height="14" rx="4" fill="#EDE6DC" opacity="0.5"/>
+    <rect x="-30" y="-166" width="14" height="68" rx="5" fill="#C47A5A" opacity="0.55"/>
+    <rect x="-7"  y="-166" width="14" height="68" rx="5" fill="#C47A5A" opacity="0.55"/>
+    <rect x="16"  y="-166" width="14" height="68" rx="5" fill="#C47A5A" opacity="0.55"/>
+    <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#F0EBE3" opacity="0.9"/>
+    <rect x="-12" y="62"  width="24" height="52"  fill="#6A9E82" opacity="0.8"/>
+    <ellipse cx="0" cy="182" rx="14" ry="11" fill="#EDE6DC"/>
   </g>
 
-  <!-- Spoon (in front) rotate -40deg -->
-  <g transform="translate(256,256) rotate(-40)">
-    <!-- Bowl -->
+  <!-- Spoon (cream, in front) -->
+  <g transform="translate(282,258) scale(0.52) rotate(-38)">
     <ellipse cx="0" cy="-148" rx="58" ry="72" fill="#F0EBE3"/>
-    <!-- Bowl inner sheen -->
-    <ellipse cx="8" cy="-158" rx="38" ry="47" fill="#EDE6DC" opacity="0.55"/>
-    <!-- Handle -->
-    <rect x="-11" y="-76" width="22" height="248" rx="11" fill="#F0EBE3"/>
-    <!-- Sage grip band -->
-    <rect x="-11" y="62" width="22" height="52" fill="#6A9E82" opacity="0.45"/>
-    <!-- End knob -->
-    <ellipse cx="0" cy="174" rx="14" ry="11" fill="#D8D0C4"/>
+    <ellipse cx="8" cy="-158" rx="38" ry="47" fill="#EDE6DC" opacity="0.5"/>
+    <rect x="-11" y="-76"  width="22" height="248" rx="11" fill="#F0EBE3"/>
+    <rect x="-11" y="62"   width="22" height="52"  fill="#6A9E82" opacity="0.75"/>
+    <ellipse cx="0" cy="174" rx="14" ry="11" fill="#EDE6DC"/>
   </g>
+
+  <!-- Bottom page edge -->
+  <rect x="116" y="470" width="324" height="8" rx="3" fill="#C8BEB2" opacity="0.45"/>
 </svg>

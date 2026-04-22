@@ -42,25 +42,34 @@ function SidebarBtn({ label, active, onClick }) {
 
 function CauldronMark() {
   return (
-    <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
-      {/* Spatula (behind) */}
-      <g transform="translate(28,28) rotate(40)">
-        <path d="M-8.5,-20 L8.5,-20 L8.5,-8 L2.5,-5 L2.5,-3 L-2.5,-3 L-2.5,-5 L-8.5,-8 Z" fill="#C47A5A"/>
-        <rect x="-6" y="-18.5" width="12" height="3" rx="1" fill="#D4896A" opacity="0.5"/>
-        <rect x="-5.5" y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
-        <rect x="-1.5" y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
-        <rect x="2.5"  y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
-        <rect x="-2.5" y="-3" width="5" height="26" rx="2.5" fill="#C47A5A"/>
-        <rect x="-2.5" y="10" width="5" height="6" fill="#6A9E82" opacity="0.6"/>
-        <circle cx="0" cy="24" r="3" fill="#B36848"/>
+    <svg width="40" height="52" viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      {/* Page edge right */}
+      <rect x="38.5" y="3" width="1.5" height="46" rx="0.5" fill="#F0EBE3" opacity="0.75"/>
+      {/* Spine */}
+      <rect x="1" y="2" width="7" height="48" rx="3" fill="#8A4428"/>
+      <rect x="1.5" y="2" width="3" height="48" rx="2" fill="#C47A5A" opacity="0.28"/>
+      {/* Front cover */}
+      <rect x="7" y="2" width="32" height="48" rx="3" fill="#C47A5A"/>
+      {/* Cover top sheen */}
+      <rect x="7" y="2" width="32" height="10" rx="3" fill="#D4896A" opacity="0.32"/>
+      {/* Binding groove */}
+      <rect x="8.5" y="2" width="1" height="48" fill="#A05030" opacity="0.45"/>
+      {/* Cover border frame */}
+      <rect x="10.5" y="5" width="26" height="42" rx="2" fill="none" stroke="#F0EBE3" strokeWidth="0.6" opacity="0.35"/>
+      {/* Spine ribs */}
+      <rect x="2" y="11" width="5" height="1.5" rx="0.5" fill="#A85840" opacity="0.6"/>
+      <rect x="2" y="40" width="5" height="1.5" rx="0.5" fill="#A85840" opacity="0.6"/>
+      {/* Spatula on cover (cream, behind) */}
+      <g transform="translate(23,26) scale(0.068) rotate(38)">
+        <path d="M-44,-188 L44,-188 L44,-82 L12,-60 L12,-48 L-12,-48 L-12,-60 L-44,-82 Z" fill="#F0EBE3" opacity="0.88"/>
+        <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#F0EBE3" opacity="0.88"/>
+        <rect x="-12" y="62" width="24" height="52" fill="#6A9E82" opacity="0.8"/>
       </g>
-      {/* Spoon (in front) */}
-      <g transform="translate(28,28) rotate(-40)">
-        <ellipse cx="0" cy="-14" rx="8" ry="10" fill="#F0EBE3"/>
-        <ellipse cx="1" cy="-16" rx="5" ry="6.5" fill="#EDE6DC" opacity="0.6"/>
-        <rect x="-2.5" y="-4" width="5" height="28" rx="2.5" fill="#F0EBE3"/>
-        <rect x="-2.5" y="10" width="5" height="6" fill="#6A9E82" opacity="0.45"/>
-        <circle cx="0" cy="25" r="3" fill="#D8D0C4"/>
+      {/* Spoon on cover (cream, in front) */}
+      <g transform="translate(23,26) scale(0.068) rotate(-38)">
+        <ellipse cx="0" cy="-148" rx="58" ry="72" fill="#F0EBE3"/>
+        <rect x="-11" y="-76" width="22" height="248" rx="11" fill="#F0EBE3"/>
+        <rect x="-11" y="62" width="22" height="52" fill="#6A9E82" opacity="0.75"/>
       </g>
     </svg>
   );

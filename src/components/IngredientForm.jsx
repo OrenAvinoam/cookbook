@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { t, sans, serif } from "../theme";
 import USDASearch from "./USDASearch";
+
+const DRAFT_KEY = "ingredient_form_draft";
 
 const UNITS = ["g", "ml", "pcs", "tbsp", "tsp", "cup", "oz", "lb", "kg", "l"];
 const MODES = [
@@ -20,18 +22,34 @@ const label = (text) => (
 );
 
 export default function IngredientForm({ initial, categories, existingMapping, onSave, onCancel }) {
-  const [form, setForm] = useState({
-    name: initial?.name || "",
-    aliases: (initial?.aliases || []).join(", "),
-    category_id: initial?.category_id || "",
-    default_unit: initial?.default_unit || "g",
-    nutrition_mode: initial?.nutrition_mode || "tracked",
-    notes: initial?.notes || "",
+  const isNew = !initial;
+
+  const [form, setForm] = useState(() => {
+    if (isNew) {
+      try {
+        const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+        if (draft) return draft;
+      } catch {}
+    }
+    return {
+      name: initial?.name || "",
+      aliases: (initial?.aliases || []).join(", "),
+      category_id: initial?.category_id || "",
+      default_unit: initial?.default_unit || "g",
+      nutrition_mode: initial?.nutrition_mode || "tracked",
+      notes: initial?.notes || "",
+    };
   });
   const [mapping, setMapping] = useState(existingMapping || null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    if (isNew) localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+  }, [form, isNew]);
+
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const clearDraft = () => localStorage.removeItem(DRAFT_KEY);
 
   const handleSave = async () => {
     if (!form.name.trim()) return;
@@ -46,10 +64,13 @@ export default function IngredientForm({ initial, categories, existingMapping, o
         notes: form.notes.trim() || null,
       };
       await onSave(payload, mapping);
+      clearDraft();
     } finally {
       setSaving(false);
     }
   };
+
+  const handleCancel = () => { clearDraft(); onCancel(); };
 
   return (
     <div style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "12px", padding: "24px" }}>
@@ -127,7 +148,7 @@ export default function IngredientForm({ initial, categories, existingMapping, o
       </div>
 
       <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-        <button onClick={onCancel} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>Cancel</button>
+        <button onClick={handleCancel} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>Cancel</button>
         <button onClick={handleSave} disabled={saving || !form.name.trim()} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "8px 20px", borderRadius: "20px", cursor: saving ? "wait" : "pointer", opacity: saving || !form.name.trim() ? 0.6 : 1 }}>
           {saving ? "Saving…" : "Save"}
         </button>

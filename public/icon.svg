@@ -1,44 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="100" fill="#2C2418"/>
 
-  <!-- Steam wisps -->
-  <path d="M165,132 C150,96 180,64 165,28" stroke="#C8BEB2" stroke-width="16" fill="none" stroke-linecap="round"/>
-  <path d="M256,122 C241,84 271,52 256,14" stroke="#C8BEB2" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.8"/>
-  <path d="M347,132 C362,96 332,64 347,28" stroke="#C8BEB2" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <!-- Spatula (behind) rotate +40deg -->
+  <g transform="translate(256,256) rotate(40)">
+    <!-- Head + shoulder -->
+    <path d="M-44,-188 L44,-188 L44,-82 L12,-60 L12,-48 L-12,-48 L-12,-60 L-44,-82 Z" fill="#C47A5A"/>
+    <!-- Head top highlight -->
+    <rect x="-38" y="-182" width="76" height="16" rx="4" fill="#D4896A" opacity="0.45"/>
+    <!-- Slots -->
+    <rect x="-30" y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
+    <rect x="-7"  y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
+    <rect x="16"  y="-168" width="14" height="70" rx="5" fill="#2C2418" opacity="0.32"/>
+    <!-- Handle -->
+    <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#C47A5A"/>
+    <!-- Sage grip band -->
+    <rect x="-12" y="62" width="24" height="52" fill="#6A9E82" opacity="0.55"/>
+    <!-- End knob -->
+    <ellipse cx="0" cy="182" rx="14" ry="11" fill="#B36848"/>
+  </g>
 
-  <!-- Cauldron body (cream/parchment) — no legs -->
-  <path d="M96,216 C76,242 60,320 64,380 C68,430 138,468 256,468 C374,468 444,430 448,380 C452,320 436,242 416,216 Z" fill="#F0EBE3"/>
-
-  <!-- Body left-side depth shading -->
-  <path d="M96,216 C76,242 60,320 64,380 C66,410 96,440 138,456" stroke="#D8D0C4" stroke-width="52" stroke-linecap="round" fill="none" opacity="0.45"/>
-
-  <!-- Copper handles -->
-  <path d="M96,262 C34,262 34,372 96,372" stroke="#C47A5A" stroke-width="40" fill="none" stroke-linecap="round"/>
-  <path d="M416,262 C478,262 478,372 416,372" stroke="#C47A5A" stroke-width="40" fill="none" stroke-linecap="round"/>
-
-  <!-- Rim ring -->
-  <ellipse cx="256" cy="216" rx="166" ry="40" fill="#C8BEB2"/>
-
-  <!-- Green bubbling liquid -->
-  <ellipse cx="256" cy="208" rx="150" ry="33" fill="#6A9E82"/>
-
-  <!-- Liquid bubbles -->
-  <circle cx="196" cy="204" r="22" fill="#7BB595"/>
-  <circle cx="304" cy="213" r="28" fill="#7BB595" opacity="0.9"/>
-  <circle cx="250" cy="192" r="16" fill="#8CC6A6" opacity="0.8"/>
-
-  <!-- Terra lid dome -->
-  <path d="M96,216 C96,144 416,144 416,216" fill="#C47A5A"/>
-  <!-- Lid sheen -->
-  <path d="M132,186 C132,148 380,148 380,186" fill="#D4896A" opacity="0.38"/>
-
-  <!-- Lid knob base -->
-  <ellipse cx="256" cy="144" rx="54" ry="30" fill="#B36848"/>
-  <!-- Lid knob top -->
-  <ellipse cx="256" cy="132" rx="42" ry="22" fill="#C47A5A"/>
-  <!-- Knob highlight -->
-  <ellipse cx="240" cy="122" rx="24" ry="13" fill="#D4896A" opacity="0.5"/>
-
-  <!-- Decorative sparkle -->
-  <path d="M392,94 L402,70 L412,94 L436,104 L412,114 L402,138 L392,114 L368,104 Z" fill="#C47A5A" opacity="0.75"/>
+  <!-- Spoon (in front) rotate -40deg -->
+  <g transform="translate(256,256) rotate(-40)">
+    <!-- Bowl -->
+    <ellipse cx="0" cy="-148" rx="58" ry="72" fill="#F0EBE3"/>
+    <!-- Bowl inner sheen -->
+    <ellipse cx="8" cy="-158" rx="38" ry="47" fill="#EDE6DC" opacity="0.55"/>
+    <!-- Handle -->
+    <rect x="-11" y="-76" width="22" height="248" rx="11" fill="#F0EBE3"/>
+    <!-- Sage grip band -->
+    <rect x="-11" y="62" width="22" height="52" fill="#6A9E82" opacity="0.45"/>
+    <!-- End knob -->
+    <ellipse cx="0" cy="174" rx="14" ry="11" fill="#D8D0C4"/>
+  </g>
 </svg>

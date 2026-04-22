@@ -42,33 +42,26 @@ function SidebarBtn({ label, active, onClick }) {
 
 function CauldronMark() {
   return (
-    <svg width="48" height="68" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
-      {/* Steam */}
-      <path d="M15,15 C13,9 17,5 15,0" stroke="#C8BEB2" strokeWidth="2.4" strokeLinecap="round"/>
-      <path d="M24,13 C22,7 26,3 24,0" stroke="#C8BEB2" strokeWidth="1.9" strokeLinecap="round" opacity="0.72"/>
-      <path d="M33,15 C35,9 31,5 33,0" stroke="#C8BEB2" strokeWidth="2.4" strokeLinecap="round"/>
-      {/* Body — no legs */}
-      <path d="M7,28 C3,36 2,50 4,58 C7,64 15,68 24,68 C33,68 41,64 44,58 C46,50 45,36 41,28 Z" fill="#F0EBE3"/>
-      {/* Depth shading */}
-      <path d="M7,28 C4,36 3,48 5,56" stroke="#D8D0C4" strokeWidth="5" strokeLinecap="round" opacity="0.42"/>
-      {/* Handles */}
-      <path d="M7,35 C0,35 0,51 7,51" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
-      <path d="M41,35 C48,35 48,51 41,51" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
-      {/* Rim */}
-      <ellipse cx="24" cy="28" rx="17" ry="4.5" fill="#C8BEB2"/>
-      {/* Green liquid */}
-      <ellipse cx="24" cy="27" rx="15.5" ry="3.5" fill="#6A9E82"/>
-      {/* Bubbles */}
-      <circle cx="19" cy="26.5" r="2.2" fill="#7BB595"/>
-      <circle cx="28" cy="28" r="2.7" fill="#7BB595" opacity="0.9"/>
-      {/* Lid */}
-      <path d="M7,28 C7,17 41,17 41,28" fill="#C47A5A"/>
-      <path d="M11,24 C11,18 37,18 37,24" fill="#CF8560" opacity="0.34"/>
-      {/* Knob */}
-      <ellipse cx="24" cy="17.5" rx="6.5" ry="3.5" fill="#B36848"/>
-      <ellipse cx="24" cy="16" rx="5" ry="2.5" fill="#C47A5A"/>
-      {/* Sparkle */}
-      <path d="M38,8 L39,5.5 L40,8 L42.5,9 L40,10 L39,12.5 L38,10 L35.5,9 Z" fill="#C47A5A" opacity="0.65"/>
+    <svg width="52" height="52" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      {/* Spatula (behind) */}
+      <g transform="translate(28,28) rotate(40)">
+        <path d="M-8.5,-20 L8.5,-20 L8.5,-8 L2.5,-5 L2.5,-3 L-2.5,-3 L-2.5,-5 L-8.5,-8 Z" fill="#C47A5A"/>
+        <rect x="-6" y="-18.5" width="12" height="3" rx="1" fill="#D4896A" opacity="0.5"/>
+        <rect x="-5.5" y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
+        <rect x="-1.5" y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
+        <rect x="2.5"  y="-14.5" width="2.5" height="9" rx="1" fill="#2C2418" opacity="0.3"/>
+        <rect x="-2.5" y="-3" width="5" height="26" rx="2.5" fill="#C47A5A"/>
+        <rect x="-2.5" y="10" width="5" height="6" fill="#6A9E82" opacity="0.6"/>
+        <circle cx="0" cy="24" r="3" fill="#B36848"/>
+      </g>
+      {/* Spoon (in front) */}
+      <g transform="translate(28,28) rotate(-40)">
+        <ellipse cx="0" cy="-14" rx="8" ry="10" fill="#F0EBE3"/>
+        <ellipse cx="1" cy="-16" rx="5" ry="6.5" fill="#EDE6DC" opacity="0.6"/>
+        <rect x="-2.5" y="-4" width="5" height="28" rx="2.5" fill="#F0EBE3"/>
+        <rect x="-2.5" y="10" width="5" height="6" fill="#6A9E82" opacity="0.45"/>
+        <circle cx="0" cy="25" r="3" fill="#D8D0C4"/>
+      </g>
     </svg>
   );
 }

@@ -3,6 +3,7 @@ import { t, serif, sans } from "../theme";
 import { titleCase, sentenceCase } from "../lib/capitalize";
 import EmojiPicker from "./EmojiPicker";
 import TimeInput from "./TimeInput";
+import ImagePicker from "./ImagePicker";
 
 const CATEGORIES = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 const PRESET_UNITS = ["g", "kg", "ml", "L", "tbsp", "tsp", "cup", "oz", "lb", "pcs", "pinch", "sprig", "clove", "slice", "bunch"];
@@ -33,7 +34,7 @@ function formatAmount(ing) {
 const emptyRecipe = {
   title: "", emoji: "🍽️", description: "", category: "breakfast",
   servings: "", prep_time: "", cook_time: "", total_time: "", dose: "",
-  tag_ids: [],
+  tag_ids: [], image_url: null, image_position: "50% 50%",
   ingredients: [{ quantity: "", unit: "g", customUnit: "", name: "" }],
   steps: [{ title: "", time: "", body: "" }],
   notes: [{ title: "", body: "" }],
@@ -66,6 +67,8 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
     ? {
         ...initial,
         tag_ids: initial.tag_ids || [],
+        image_url: initial.image_url || null,
+        image_position: initial.image_position || "50% 50%",
         ingredients: (initial.ingredients || []).map((ing) => ({ ...parseAmount(ing.amount), name: ing.name })),
         steps: initial.steps || [],
         notes: initial.notes || [],
@@ -96,6 +99,8 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
         ...form,
         ingredients: form.ingredients.map((ing) => ({ amount: formatAmount(ing), name: ing.name })),
         nutrition: initial?.nutrition || null,
+        image_url: form.image_url || null,
+        image_position: form.image_position || "50% 50%",
       };
       await onSave(payload);
     } finally {
@@ -141,6 +146,14 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
             <EmojiPicker value={form.emoji} onChange={(v) => set("emoji", v)} />
           </Field>
         </div>
+
+        <Field label="Photo (optional)">
+          <ImagePicker
+            imageUrl={form.image_url}
+            imagePosition={form.image_position}
+            onChange={(url, pos) => { set("image_url", url); set("image_position", pos); }}
+          />
+        </Field>
 
         <Field label="Description">
           <TextInput

@@ -39,15 +39,32 @@ function SidebarBtn({ label, active, onClick }) {
   );
 }
 
-function BotanicalSprig() {
+function CauldronMark() {
   return (
     <svg width="28" height="56" viewBox="0 0 28 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
-      <line x1="14" y1="54" x2="14" y2="4" stroke="#C47A5A" strokeWidth="1.5" strokeLinecap="round"/>
-      <ellipse cx="7"  cy="42" rx="9" ry="4"   fill="#6A9E82"              transform="rotate(-32 7 42)"/>
-      <ellipse cx="21" cy="34" rx="9" ry="4"   fill="#6A9E82"              transform="rotate(32 21 34)"/>
-      <ellipse cx="7"  cy="24" rx="8" ry="3.5" fill="#6A9E82" opacity="0.85" transform="rotate(-26 7 24)"/>
-      <ellipse cx="21" cy="16" rx="8" ry="3.5" fill="#6A9E82" opacity="0.85" transform="rotate(26 21 16)"/>
-      <ellipse cx="14" cy="8"  rx="6" ry="3"   fill="#6A9E82" opacity="0.7"/>
+      {/* Steam */}
+      <path d="M9,13 C8,9 10,6 9,2" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.7"/>
+      <path d="M14,12 C13,8 15,5 14,1" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.6"/>
+      <path d="M19,13 C20,9 18,6 19,2" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.7"/>
+      {/* Lid knob */}
+      <circle cx="14" cy="15" r="2.5" stroke="#C47A5A" strokeWidth="1.5"/>
+      {/* Lid dome */}
+      <path d="M4,22 C4,16 24,16 24,22" stroke="#C47A5A" strokeWidth="1.8" strokeLinecap="round"/>
+      {/* Rim */}
+      <ellipse cx="14" cy="22" rx="11" ry="2.5" stroke="#6A9E82" strokeWidth="1.5"/>
+      {/* Body */}
+      <path d="M5,22 C3,24 2,34 2,38 C2,42 7,45 14,45 C21,45 26,42 26,38 C26,34 25,24 23,22" stroke="#6A9E82" strokeWidth="1.8" strokeLinecap="round"/>
+      {/* Handles */}
+      <path d="M5,27 C0,27 0,38 5,38" stroke="#C47A5A" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M23,27 C28,27 28,38 23,38" stroke="#C47A5A" strokeWidth="2" strokeLinecap="round"/>
+      {/* Bubbles */}
+      <circle cx="10" cy="35" r="1.8" stroke="#6A9E82" strokeWidth="1" opacity="0.7"/>
+      <circle cx="17" cy="32" r="2.2" stroke="#6A9E82" strokeWidth="1" opacity="0.55"/>
+      <circle cx="14" cy="40" r="1.2" stroke="#6A9E82" strokeWidth="1" opacity="0.5"/>
+      {/* Legs */}
+      <rect x="5.5" y="44" width="3.5" height="9" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
+      <rect x="12.25" y="45.5" width="3.5" height="7.5" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
+      <rect x="19" y="44" width="3.5" height="9" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
     </svg>
   );
 }
@@ -66,7 +83,7 @@ export default function App() {
   const [adding, setAdding] = useState(false);
   const [section, setSection] = useState("recipes");
   const [selectedPlan, setSelectedPlan] = useState(null);
-  const [showTagManager, setShowTagManager] = useState(false);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 680);
@@ -116,7 +133,12 @@ export default function App() {
   const filteredRecipes = recipes.filter(r => {
     const catOk = selectedCategory === "all" || r.category === selectedCategory;
     const tagOk = !selectedTagId || (r.tag_ids || []).includes(selectedTagId);
-    return catOk && tagOk;
+    const q = search.trim().toLowerCase();
+    const searchOk = !q ||
+      r.title?.toLowerCase().includes(q) ||
+      r.description?.toLowerCase().includes(q) ||
+      (r.ingredients || []).some(ing => ing.name?.toLowerCase().includes(q));
+    return catOk && tagOk && searchOk;
   });
 
   async function handleSave(form) {
@@ -127,6 +149,8 @@ export default function App() {
       total_time: form.total_time, dose: form.dose,
       ingredients: form.ingredients, steps: form.steps, notes: form.notes,
       nutrition: form.nutrition || null,
+      image_url: form.image_url || null,
+      image_position: form.image_position || "50% 50%",
     };
     if (form.id) {
       const { error } = await supabase.from("recipes").update(payload).eq("id", form.id);
@@ -169,9 +193,11 @@ export default function App() {
   }
 
   async function handleSavePlan(plan) {
-    const { error } = await supabase.from("meal_plans").update({ name: plan.name, days: plan.days }).eq("id", plan.id);
+    const { error } = await supabase.from("meal_plans").update({
+      name: plan.name, days: plan.days, day_notes: plan.day_notes || {}
+    }).eq("id", plan.id);
     if (error) throw error;
-    setMealPlans(prev => prev.map(p => p.id === plan.id ? { ...p, name: plan.name, days: plan.days } : p));
+    setMealPlans(prev => prev.map(p => p.id === plan.id ? { ...p, name: plan.name, days: plan.days, day_notes: plan.day_notes } : p));
   }
 
   async function handleDeletePlan(id) {
@@ -208,11 +234,12 @@ export default function App() {
   const selectedPlanData = mealPlans.find(p => p.id === selectedPlan);
   const inListView     = !selected && !adding && section === "recipes";
   const inPlanListView = section === "mealplans" && !selectedPlan;
-  const showSidebar    = !isMobile && (inListView || inPlanListView);
+  const inTagsView     = section === "tags";
+  const showSidebar    = !isMobile && (inListView || inPlanListView || inTagsView);
 
-  const overStyle  = { fontSize: "10px", color: t.green,   fontFamily: sans,  letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0",  background: "none", border: "none", outline: "none", padding: 0 };
+  const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0",  background: "none", border: "none", outline: "none", padding: 0 };
   const titleStyle = { fontSize: "clamp(22px, 4vw, 36px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em", background: "none", border: "none", outline: "none", padding: 0 };
-  const subStyle   = { fontSize: "10px", color: t.terra,   fontFamily: sans,  letterSpacing: "0.18em", textTransform: "uppercase", margin: 0,             background: "none", border: "none", outline: "none", padding: 0 };
+  const subStyle   = { fontSize: "11px", color: t.terra,  fontFamily: sans, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0,             background: "none", border: "none", outline: "none", padding: 0 };
 
   const EditableText = ({ field, baseStyle, tag: Tag = "p" }) => {
     if (editingField === field) {
@@ -230,10 +257,9 @@ export default function App() {
     return <Tag onClick={() => startEdit(field)} style={{ ...baseStyle, cursor: "text" }} title="Click to edit">{config[field]}</Tag>;
   };
 
-
   return (
     <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle at 20% 80%, rgba(106,158,130,0.05) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(196,122,90,0.05) 0%, transparent 50%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle at 15% 85%, rgba(106,158,130,0.07) 0%, transparent 45%), radial-gradient(circle at 85% 15%, rgba(196,122,90,0.07) 0%, transparent 45%)", pointerEvents: "none", zIndex: 0 }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
@@ -241,20 +267,15 @@ export default function App() {
           <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <BotanicalSprig />
+                <CauldronMark />
                 <div>
                   <EditableText field="overtitle" baseStyle={overStyle} tag="p" />
                   <EditableText field="title" baseStyle={titleStyle} tag="h1" />
                   <EditableText field="subtitle" baseStyle={subStyle} tag="p" />
                 </div>
               </div>
-              {(inListView || inPlanListView) && (
+              {(inListView || inPlanListView || inTagsView) && (
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {inListView && (
-                    <button onClick={() => setShowTagManager(true)} style={{ background: "transparent", border: "1px solid rgba(221,213,200,0.35)", color: "#DDD5C8", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 14px", borderRadius: "20px", cursor: "pointer" }}>
-                      Tags
-                    </button>
-                  )}
                   {inListView && (
                     <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
                       + New recipe
@@ -293,13 +314,13 @@ export default function App() {
             <MealPlanDetail plan={selectedPlanData} recipes={recipes} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
           )}
 
-          {!loading && !error && (inListView || inPlanListView) && (
+          {!loading && !error && (inListView || inPlanListView || inTagsView) && (
             <div style={{ display: "flex", alignItems: "flex-start" }}>
 
               {/* Desktop sidebar */}
               {showSidebar && (
                 <aside style={{ width: "172px", flexShrink: 0, position: "sticky", top: "24px", alignSelf: "flex-start", paddingRight: "20px", borderRight: `1px solid ${t.border}`, marginRight: "24px" }}>
-                  <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Recipes</p>
+                  <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Recipes</p>
                   {CATEGORIES.map(cat => (
                     <SidebarBtn key={cat}
                       label={cat === "all" ? "All recipes" : cat}
@@ -308,8 +329,12 @@ export default function App() {
                     />
                   ))}
                   <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                    <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
+                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
                     <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
+                  </div>
+                  <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
+                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Manage</p>
+                    <SidebarBtn label="Tags" active={section === "tags"} onClick={() => { setSection("tags"); setSelected(null); setAdding(false); }} />
                   </div>
                 </aside>
               )}
@@ -333,22 +358,45 @@ export default function App() {
                       color: section === "mealplans" ? "#fff" : t.inkLight,
                       fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
                     }}>Meal plans</button>
+                    <button onClick={() => setSection("tags")} style={{
+                      padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
+                      background: section === "tags" ? t.green : t.surface2,
+                      color: section === "tags" ? "#fff" : t.inkLight,
+                      fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                    }}>Tags</button>
                   </div>
                 )}
 
                 {/* Recipes list */}
                 {section === "recipes" && (
                   <div>
+                    {/* Search bar */}
+                    <div style={{ position: "relative", marginBottom: "16px" }}>
+                      <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: t.inkFaint, pointerEvents: "none" }}>🔍</span>
+                      <input
+                        type="text"
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        placeholder="Search recipes, ingredients…"
+                        style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "10px 16px 10px 36px", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                        onFocus={e => e.target.style.borderColor = t.green}
+                        onBlur={e => e.target.style.borderColor = t.border}
+                      />
+                      {search && (
+                        <button onClick={() => setSearch("")} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontSize: "16px", lineHeight: 1 }}>×</button>
+                      )}
+                    </div>
+
                     {tags.length > 0 && (
                       <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "20px", alignItems: "center" }}>
-                        <span style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>Filter:</span>
+                        <span style={{ fontSize: "11px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>Filter:</span>
                         {tags.map(tag => {
                           const active = selectedTagId === tag.id;
                           return (
                             <button key={tag.id} onClick={() => setSelectedTagId(active ? null : tag.id)} style={{
                               padding: "3px 10px", borderRadius: "20px", border: `1px solid ${tag.color}`,
                               background: active ? tag.color : "transparent", color: active ? "#fff" : tag.color,
-                              fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                              fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
                             }}>{tag.name}</button>
                           );
                         })}
@@ -357,11 +405,14 @@ export default function App() {
                         )}
                       </div>
                     )}
-                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 14px 0", paddingBottom: "10px", borderBottom: `1px solid ${t.border}` }}>
+                    <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 14px 0", paddingBottom: "10px", borderBottom: `1px solid ${t.border}` }}>
                       {filteredRecipes.length} {filteredRecipes.length === 1 ? "recipe" : "recipes"}
+                      {search && <span style={{ color: t.terra }}> · "{search}"</span>}
                     </p>
                     {filteredRecipes.length === 0 && (
-                      <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>No recipes in this category.</div>
+                      <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>
+                        {search ? `No recipes matching "${search}"` : "No recipes in this category."}
+                      </div>
                     )}
                     <div key={`${selectedCategory}-${selectedTagId}`} style={{ display: "flex", flexDirection: "column", gap: "12px", animation: "fadeSlideIn 0.2s ease" }}>
                       {filteredRecipes.map(r => (
@@ -375,15 +426,16 @@ export default function App() {
                 {section === "mealplans" && (
                   <MealPlanList plans={mealPlans} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} onDelete={handleDeletePlan} onRename={handleRenamePlan} />
                 )}
+
+                {/* Tags section */}
+                {section === "tags" && (
+                  <TagManager tags={tags} onCreate={createTag} onUpdate={updateTag} onDelete={deleteTag} />
+                )}
               </main>
             </div>
           )}
         </div>
       </div>
-
-      {showTagManager && (
-        <TagManager tags={tags} onCreate={createTag} onUpdate={updateTag} onDelete={deleteTag} onClose={() => setShowTagManager(false)} />
-      )}
     </div>
   );
 }

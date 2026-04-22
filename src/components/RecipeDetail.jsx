@@ -5,6 +5,9 @@ import StepList from "./StepList";
 import NoteList from "./NoteList";
 import NutritionLabel from "./NutritionLabel";
 import RecipeForm from "./RecipeForm";
+import PrintView from "./PrintView";
+
+const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
 const NUTRITION_FIELDS = [
   { key: "calories",     label: "Calories",          unit: "kcal" },
@@ -25,6 +28,22 @@ const NUTRITION_FIELDS = [
 
 const emptyNutrition = Object.fromEntries(NUTRITION_FIELDS.map((f) => [f.key, ""]));
 
+function scaleAmount(str, factor) {
+  if (!str || factor === 1) return str;
+  const FRAC = { "½": 0.5, "¼": 0.25, "¾": 0.75, "⅓": 1 / 3, "⅔": 2 / 3, "⅛": 0.125 };
+  let s = str.trim();
+  for (const [sym, val] of Object.entries(FRAC))
+    s = s.replace(sym, (Math.round(val * 1000) / 1000).toString());
+  const mixed = s.match(/^(\d+)\s+(\d+)\/(\d+)(.*)/);
+  if (mixed) return fmtN((+mixed[1] + +mixed[2] / +mixed[3]) * factor) + mixed[4];
+  const frac = s.match(/^(\d+)\/(\d+)(.*)/);
+  if (frac) return fmtN((+frac[1] / +frac[2]) * factor) + frac[3];
+  const num = s.match(/^(\d*\.?\d+)(.*)/);
+  if (num) return fmtN(parseFloat(num[1]) * factor) + num[2];
+  return str;
+}
+function fmtN(n) { const r = Math.round(n * 100) / 100; return String(r); }
+
 function NutritionForm({ initial, onSave, onCancel }) {
   const [vals, setVals] = useState(
     initial ? Object.fromEntries(NUTRITION_FIELDS.map((f) => [f.key, initial[f.key] ?? ""])) : emptyNutrition
@@ -41,19 +60,17 @@ function NutritionForm({ initial, onSave, onCancel }) {
 
   return (
     <div>
-      <p style={{ fontFamily: sans, fontSize: "12px", color: t.inkFaint, margin: "0 0 16px 0", lineHeight: 1.6 }}>
+      <p style={{ fontFamily: sans, fontSize: "13px", color: t.inkFaint, margin: "0 0 16px 0", lineHeight: 1.6 }}>
         Enter per-serving values. Leave blank for any you don't have.
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px", marginBottom: "20px" }}>
         {NUTRITION_FIELDS.map((f) => (
           <div key={f.key}>
-            <label style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "3px" }}>
+            <label style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "3px" }}>
               {f.label} <span style={{ opacity: 0.6 }}>({f.unit})</span>
             </label>
             <input
-              type="number"
-              min="0"
-              step="any"
+              type="number" min="0" step="any"
               value={vals[f.key]}
               onChange={(e) => setVals((v) => ({ ...v, [f.key]: e.target.value }))}
               style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 10px", outline: "none", boxSizing: "border-box" }}
@@ -79,6 +96,19 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
   const [tab, setTab] = useState("ingredients");
   const [editing, setEditing] = useState(false);
   const [editingNutrition, setEditingNutrition] = useState(false);
+  const [printing, setPrinting] = useState(false);
+  const [cookMode, setCookMode] = useState(false);
+  const [checkedIngredients, setCheckedIngredients] = useState(new Set());
+  const [checkedSteps, setCheckedSteps] = useState(new Set());
+  const [servingsCount, setServingsCount] = useState(() => parseFloat(recipe.servings) || 1);
+
+  const baseServings = parseFloat(recipe.servings) || 1;
+  const scaleFactor = servingsCount / baseServings;
+
+  const scaledIngredients = (recipe.ingredients || []).map(ing => ({
+    ...ing,
+    amount: scaleAmount(ing.amount, scaleFactor),
+  }));
 
   const recipeTags = (recipe.tag_ids || [])
     .map((id) => tags.find((tg) => tg.id === id))
@@ -86,6 +116,22 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
 
   const accentColor = recipeTags[0]?.color || t.green;
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
+
+  function toggleIngredient(i) {
+    setCheckedIngredients(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+
+  function toggleStep(i) {
+    setCheckedSteps(prev => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
 
   async function handleSaveNutrition(nutrition) {
     await onSave({ ...recipe, nutrition });
@@ -103,13 +149,23 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
     );
   }
 
+  if (printing) {
+    return <PrintView recipe={recipe} tags={tags} scaleFactor={scaleFactor} onClose={() => setPrinting(false)} />;
+  }
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "8px" }}>
         <button onClick={onBack} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
           ← All recipes
         </button>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <button onClick={() => setPrinting(true)} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
+            Print / PDF
+          </button>
+          <button onClick={() => { setCookMode(m => !m); setCheckedIngredients(new Set()); setCheckedSteps(new Set()); }} style={{ background: cookMode ? accentColor : "transparent", border: `1px solid ${cookMode ? accentColor : t.border}`, color: cookMode ? "#fff" : t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
+            {cookMode ? "Exit cook mode" : "Cook mode"}
+          </button>
           <button onClick={() => setEditing(true)} style={{ background: "transparent", border: `1px solid ${accentColor}`, color: accentColor, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
             Edit
           </button>
@@ -123,36 +179,54 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
         <div style={{ marginBottom: "16px" }}>
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
             {recipe.category && (
-              <span style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
+              <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
                 {recipe.category}
               </span>
             )}
             {recipeTags.map((tag) => (
-              <span key={tag.id} style={{ fontSize: "9px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: tag.color, background: tag.color + "18", border: `1px solid ${tag.color}40`, padding: "3px 8px", borderRadius: "20px" }}>
+              <span key={tag.id} style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: tag.color, background: tag.color + "18", border: `1px solid ${tag.color}40`, padding: "3px 8px", borderRadius: "20px" }}>
                 {tag.name}
               </span>
             ))}
           </div>
           <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center", fontFamily: "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif" }}>{recipe.emoji}</span>
+            {recipe.image_url ? (
+              <div style={{ width: "72px", height: "72px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `2px solid ${accentColor}40` }}>
+                <img src={recipe.image_url} alt={recipe.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: recipe.image_position || "50% 50%" }} />
+              </div>
+            ) : (
+              <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center", fontFamily: EMOJI_FONT }}>{recipe.emoji}</span>
+            )}
             <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h1>
           </div>
-          <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
+          <p style={{ fontSize: "14px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px", alignItems: "center", gap: "0" }}>
           {[
             { l: "Prep", v: recipe.prep_time },
             { l: "Cook", v: recipe.cook_time },
             { l: "Total", v: recipe.total_time },
-            { l: "Servings", v: recipe.servings },
             { l: "Daily dose", v: recipe.dose },
           ].filter((s) => s.v).map((s, i, arr) => (
-            <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : "none", minWidth: "80px" }}>
-              <div style={{ fontSize: "13px", color: t.ink, fontFamily: serif }}>{s.v}</div>
-              <div style={{ fontSize: "9px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
+            <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : `1px solid ${t.border}`, minWidth: "80px" }}>
+              <div style={{ fontSize: "14px", color: t.ink, fontFamily: serif }}>{s.v}</div>
+              <div style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
             </div>
           ))}
+          {/* Servings with scale control */}
+          {recipe.servings && (
+            <div style={{ flex: "1 1 auto", padding: "10px 16px", minWidth: "100px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <button onClick={() => setServingsCount(c => Math.max(0.5, c - (c <= 1 ? 0.5 : 1)))} style={{ width: "22px", height: "22px", borderRadius: "50%", border: `1px solid ${t.border}`, background: t.surface2, color: t.inkMid, fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, lineHeight: 1 }}>−</button>
+                <span style={{ fontSize: "14px", color: scaleFactor !== 1 ? accentColor : t.ink, fontFamily: serif, minWidth: "24px", textAlign: "center" }}>{servingsCount}</span>
+                <button onClick={() => setServingsCount(c => c + 1)} style={{ width: "22px", height: "22px", borderRadius: "50%", border: `1px solid ${t.border}`, background: t.surface2, color: t.inkMid, fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, lineHeight: 1 }}>+</button>
+              </div>
+              <div style={{ fontSize: "10px", color: scaleFactor !== 1 ? accentColor : t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>
+                Servings{scaleFactor !== 1 ? ` · ×${Math.round(scaleFactor * 100) / 100}` : ""}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -171,8 +245,24 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
       </div>
 
       <div key={tab} style={{ animation: "fadeSlideIn 0.18s ease" }}>
-        {tab === "ingredients" && <IngredientList ingredients={recipe.ingredients} accentColor={accentColor} />}
-        {tab === "steps" && <StepList steps={recipe.steps} accentColor={accentColor} />}
+        {tab === "ingredients" && (
+          <IngredientList
+            ingredients={scaledIngredients}
+            accentColor={accentColor}
+            cookMode={cookMode}
+            checkedItems={checkedIngredients}
+            onToggle={toggleIngredient}
+          />
+        )}
+        {tab === "steps" && (
+          <StepList
+            steps={recipe.steps}
+            accentColor={accentColor}
+            cookMode={cookMode}
+            checkedSteps={checkedSteps}
+            onToggleStep={toggleStep}
+          />
+        )}
         {tab === "notes" && <NoteList notes={recipe.notes} accentColor={accentColor} />}
         {tab === "nutrition" && (
           <div>

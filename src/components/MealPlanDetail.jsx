@@ -13,8 +13,6 @@ const NUTRITION_FIELDS = [
   { key: "sodium",    label: "Sodium",    unit: "mg"   },
 ];
 
-// ── Shopping list aggregation ─────────────────────────────────────────────────
-
 const UNIT_MAP = {
   g: { fam: "w", f: 1 }, gram: { fam: "w", f: 1 }, grams: { fam: "w", f: 1 },
   kg: { fam: "w", f: 1000 }, kilogram: { fam: "w", f: 1000 }, kilograms: { fam: "w", f: 1000 },
@@ -71,43 +69,32 @@ function aggregateIngredients(ings) {
     if (!groups[groupKey]) groups[groupKey] = { displayName: ing.name.trim(), entries: [] };
     groups[groupKey].entries.push(p);
   }
-
   return Object.values(groups).map(({ displayName, entries }) => {
     if (entries.length === 1) return { name: displayName, amount: entries[0].raw };
-
     const { fam } = entries[0];
-
-    // Convert to base unit and sum
     if (fam !== "other" && entries.every(e => e.qty != null && e.f != null)) {
       const totalBase = entries.reduce((s, e) => s + e.qty * e.f, 0);
-      if (fam === "pcs") {
-        const total = +totalBase.toFixed(2).replace(/\.?0+$/, "");
-        return { name: displayName, amount: `${total} pcs` };
-      }
+      if (fam === "pcs") return { name: displayName, amount: `${+totalBase.toFixed(2).replace(/\.?0+$/, "")} pcs` };
       const formatted = formatTotal(totalBase, fam);
       if (formatted) return { name: displayName, amount: formatted };
     }
-
-    // Same unit, sum quantities
     if (entries.every(e => e.unit === entries[0].unit && e.qty != null)) {
       const total = entries.reduce((s, e) => s + e.qty, 0);
       const unit = entries[0].unit;
       return { name: displayName, amount: `${+total.toFixed(2).replace(/\.?0+$/, "")}${unit ? " " + unit : ""}` };
     }
-
-    // Fallback: join original amounts
     return { name: displayName, amount: entries.map(e => e.raw).join(" + ") };
   });
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete }) {
   const normalize = (raw) => Object.fromEntries(DAYS.map(d => [d, (raw || {})[d] || []]));
   const [localDays, setLocalDays] = useState(() => normalize(plan.days));
+  const [localNotes, setLocalNotes] = useState(() => plan.day_notes || {});
   const [name, setName] = useState(plan.name);
   const [saving, setSaving] = useState(false);
   const [addingToDay, setAddingToDay] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const getRecipe = (id) => recipes.find(r => r.id === id);
 
@@ -116,15 +103,21 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
 
   const handleSave = async () => {
     setSaving(true);
-    try { await onSave({ ...plan, name, days: localDays }); }
+    try { await onSave({ ...plan, name, days: localDays, day_notes: localNotes }); }
     finally { setSaving(false); }
   };
 
-  // All ingredient occurrences across all day slots (counts duplicates for multi-day recipes)
   const allIngredients = Object.values(localDays).flat().flatMap(id => getRecipe(id)?.ingredients || []);
   const shoppingList = aggregateIngredients(allIngredients);
 
-  // Unique recipes for nutrition
+  const copyShoppingList = () => {
+    const text = shoppingList.map(item => `• ${item.amount}  ${item.name}`).join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2200);
+    });
+  };
+
   const uniqueIds = [...new Set(Object.values(localDays).flat())];
   const totals = {};
   uniqueIds.forEach(id => {
@@ -135,8 +128,11 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
   const dailyAvg = Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, +(v / 7).toFixed(1)]));
   const hasNutrition = Object.keys(totals).length > 0;
 
-  const sectionHdr = (label) => (
-    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "32px 0 14px 0", paddingBottom: "8px", borderBottom: `1px solid ${t.border}` }}>{label}</p>
+  const sectionHdr = (label, extra) => (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "32px 0 14px 0", paddingBottom: "8px", borderBottom: `1px solid ${t.border}` }}>
+      <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: 0 }}>{label}</p>
+      {extra}
+    </div>
   );
 
   return (
@@ -160,12 +156,11 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
 
       {sectionHdr("Week")}
 
-      {/* 7-column day layout */}
       <div style={{ overflowX: "auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "8px", minWidth: "840px" }}>
           {DAYS.map(day => (
             <div key={day} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "8px", padding: "10px 8px 8px", display: "flex", flexDirection: "column", gap: "4px" }}>
-              <p style={{ fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 0", paddingBottom: "6px", borderBottom: `1px solid ${t.surface2}`, textAlign: "center" }}>{day.slice(0, 3)}</p>
+              <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 0", paddingBottom: "6px", borderBottom: `1px solid ${t.surface2}`, textAlign: "center" }}>{day.slice(0, 3)}</p>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                 {localDays[day].map((recipeId, idx) => {
                   const r = getRecipe(recipeId);
@@ -188,6 +183,14 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
               ) : (
                 <button onClick={() => setAddingToDay(day)} style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "10px", letterSpacing: "0.06em", padding: "5px 4px", borderRadius: "5px", cursor: "pointer" }}>+ Add</button>
               )}
+              {/* Day note */}
+              <textarea
+                value={localNotes[day] || ""}
+                onChange={e => setLocalNotes(n => ({ ...n, [day]: e.target.value }))}
+                placeholder="Note…"
+                rows={2}
+                style={{ width: "100%", fontFamily: sans, fontSize: "10px", color: t.inkLight, background: "transparent", border: `1px solid ${t.border}`, borderRadius: "5px", padding: "4px 6px", outline: "none", resize: "none", boxSizing: "border-box", marginTop: "4px" }}
+              />
             </div>
           ))}
         </div>
@@ -203,7 +206,7 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
                 <div style={{ fontSize: "18px", fontFamily: serif, color: t.ink }}>
                   {dailyAvg[f.key]}<span style={{ fontSize: "11px", color: t.inkFaint, marginLeft: "3px", fontFamily: sans }}>{f.unit}</span>
                 </div>
-                <div style={{ fontSize: "10px", letterSpacing: "0.12em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, marginTop: "3px" }}>{f.label}</div>
+                <div style={{ fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, marginTop: "3px" }}>{f.label}</div>
               </div>
             ))}
           </div>
@@ -213,7 +216,15 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
       {/* Shopping list */}
       {shoppingList.length > 0 && (
         <>
-          {sectionHdr(`Shopping List (${shoppingList.length} items)`)}
+          {sectionHdr(
+            `Shopping List (${shoppingList.length} items)`,
+            <button
+              onClick={copyShoppingList}
+              style={{ background: copied ? t.green : "transparent", border: `1px solid ${copied ? t.green : t.border}`, color: copied ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "5px 14px", borderRadius: "20px", cursor: "pointer", transition: "all 0.2s" }}
+            >
+              {copied ? "Copied!" : "Copy list"}
+            </button>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "6px" }}>
             {shoppingList.map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "10px", padding: "8px 12px", background: t.surface, border: `1px solid ${t.border}`, borderRadius: "7px" }}>

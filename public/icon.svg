@@ -1,34 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="100" fill="#2C2418"/>
 
-  <!-- Steam -->
-  <path d="M175,118 C160,86 180,58 165,26" stroke="#C47A5A" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.85"/>
-  <path d="M256,112 C241,78 261,50 246,16" stroke="#C47A5A" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.75"/>
-  <path d="M337,118 C352,86 332,58 347,26" stroke="#C47A5A" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.85"/>
-
-  <!-- Lid knob -->
-  <circle cx="256" cy="148" r="24" stroke="#C47A5A" stroke-width="14" fill="none"/>
-
-  <!-- Lid dome -->
-  <path d="M88,204 C88,158 424,158 424,204" stroke="#C47A5A" stroke-width="17" fill="none" stroke-linecap="round"/>
-
-  <!-- Rim -->
-  <ellipse cx="256" cy="204" rx="168" ry="24" stroke="#6A9E82" stroke-width="17" fill="none"/>
-
-  <!-- Body -->
-  <path d="M96,204 C72,220 56,302 56,350 C56,392 148,420 256,420 C364,420 456,392 456,350 C456,302 440,220 416,204" stroke="#6A9E82" stroke-width="18" fill="none" stroke-linecap="round"/>
-
-  <!-- Handles -->
-  <path d="M96,252 C38,252 38,352 96,352" stroke="#C47A5A" stroke-width="20" fill="none" stroke-linecap="round"/>
-  <path d="M416,252 C474,252 474,352 416,352" stroke="#C47A5A" stroke-width="20" fill="none" stroke-linecap="round"/>
-
-  <!-- Bubbles -->
-  <circle cx="186" cy="342" r="20" stroke="#6A9E82" stroke-width="11" fill="none" opacity="0.7"/>
-  <circle cx="300" cy="308" r="26" stroke="#6A9E82" stroke-width="11" fill="none" opacity="0.6"/>
-  <circle cx="242" cy="388" r="14" stroke="#6A9E82" stroke-width="11" fill="none" opacity="0.5"/>
+  <!-- Steam wisps -->
+  <path d="M165,132 C150,96 180,64 165,28" stroke="#C8BEB2" stroke-width="16" fill="none" stroke-linecap="round"/>
+  <path d="M256,122 C241,84 271,52 256,14" stroke="#C8BEB2" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.8"/>
+  <path d="M347,132 C362,96 332,64 347,28" stroke="#C8BEB2" stroke-width="16" fill="none" stroke-linecap="round"/>
 
   <!-- Legs -->
-  <rect x="136" y="416" width="46" height="62" rx="23" stroke="#6A9E82" stroke-width="13" fill="none"/>
-  <rect x="233" y="422" width="46" height="52" rx="23" stroke="#6A9E82" stroke-width="13" fill="none"/>
-  <rect x="330" y="416" width="46" height="62" rx="23" stroke="#6A9E82" stroke-width="13" fill="none"/>
+  <rect x="106" y="414" width="72" height="80" rx="36" fill="#E8E0D6"/>
+  <rect x="220" y="430" width="72" height="64" rx="32" fill="#E8E0D6"/>
+  <rect x="334" y="414" width="72" height="80" rx="36" fill="#E8E0D6"/>
+
+  <!-- Cauldron body (cream/parchment) -->
+  <path d="M96,216 C76,242 60,320 64,370 C68,418 138,452 256,452 C374,452 444,418 448,370 C452,320 436,242 416,216 Z" fill="#F0EBE3"/>
+
+  <!-- Body left-side depth shading -->
+  <path d="M96,216 C76,242 60,320 64,370 C66,398 96,426 138,440" stroke="#D8D0C4" stroke-width="52" stroke-linecap="round" fill="none" opacity="0.45"/>
+
+  <!-- Copper handles -->
+  <path d="M96,262 C34,262 34,372 96,372" stroke="#C47A5A" stroke-width="40" fill="none" stroke-linecap="round"/>
+  <path d="M416,262 C478,262 478,372 416,372" stroke="#C47A5A" stroke-width="40" fill="none" stroke-linecap="round"/>
+
+  <!-- Rim ring -->
+  <ellipse cx="256" cy="216" rx="166" ry="40" fill="#C8BEB2"/>
+
+  <!-- Green bubbling liquid -->
+  <ellipse cx="256" cy="208" rx="150" ry="33" fill="#6A9E82"/>
+
+  <!-- Liquid bubbles -->
+  <circle cx="196" cy="204" r="22" fill="#7BB595"/>
+  <circle cx="304" cy="213" r="28" fill="#7BB595" opacity="0.9"/>
+  <circle cx="250" cy="192" r="16" fill="#8CC6A6" opacity="0.8"/>
+
+  <!-- Terra lid dome -->
+  <path d="M96,216 C96,144 416,144 416,216" fill="#C47A5A"/>
+  <!-- Lid sheen -->
+  <path d="M132,186 C132,148 380,148 380,186" fill="#D4896A" opacity="0.38"/>
+
+  <!-- Lid knob base -->
+  <ellipse cx="256" cy="144" rx="54" ry="30" fill="#B36848"/>
+  <!-- Lid knob top -->
+  <ellipse cx="256" cy="132" rx="42" ry="22" fill="#C47A5A"/>
+  <!-- Knob highlight -->
+  <ellipse cx="240" cy="122" rx="24" ry="13" fill="#D4896A" opacity="0.5"/>
+
+  <!-- Decorative sparkle -->
+  <path d="M392,94 L402,70 L412,94 L436,104 L412,114 L402,138 L392,114 L368,104 Z" fill="#C47A5A" opacity="0.75"/>
 </svg>

@@ -41,30 +41,40 @@ function SidebarBtn({ label, active, onClick }) {
 
 function CauldronMark() {
   return (
-    <svg width="28" height="56" viewBox="0 0 28 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
-      {/* Steam */}
-      <path d="M9,13 C8,9 10,6 9,2" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.7"/>
-      <path d="M14,12 C13,8 15,5 14,1" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.6"/>
-      <path d="M19,13 C20,9 18,6 19,2" stroke="#C47A5A" strokeWidth="1.3" strokeLinecap="round" opacity="0.7"/>
-      {/* Lid knob */}
-      <circle cx="14" cy="15" r="2.5" stroke="#C47A5A" strokeWidth="1.5"/>
-      {/* Lid dome */}
-      <path d="M4,22 C4,16 24,16 24,22" stroke="#C47A5A" strokeWidth="1.8" strokeLinecap="round"/>
-      {/* Rim */}
-      <ellipse cx="14" cy="22" rx="11" ry="2.5" stroke="#6A9E82" strokeWidth="1.5"/>
-      {/* Body */}
-      <path d="M5,22 C3,24 2,34 2,38 C2,42 7,45 14,45 C21,45 26,42 26,38 C26,34 25,24 23,22" stroke="#6A9E82" strokeWidth="1.8" strokeLinecap="round"/>
-      {/* Handles */}
-      <path d="M5,27 C0,27 0,38 5,38" stroke="#C47A5A" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M23,27 C28,27 28,38 23,38" stroke="#C47A5A" strokeWidth="2" strokeLinecap="round"/>
-      {/* Bubbles */}
-      <circle cx="10" cy="35" r="1.8" stroke="#6A9E82" strokeWidth="1" opacity="0.7"/>
-      <circle cx="17" cy="32" r="2.2" stroke="#6A9E82" strokeWidth="1" opacity="0.55"/>
-      <circle cx="14" cy="40" r="1.2" stroke="#6A9E82" strokeWidth="1" opacity="0.5"/>
+    <svg width="52" height="74" viewBox="0 0 52 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      {/* Steam - cream colored wisps */}
+      <path d="M17,20 C15,14 19,10 17,5" stroke="#C8BEB2" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M26,18 C24,12 28,8 26,3" stroke="#C8BEB2" strokeWidth="2" strokeLinecap="round" opacity="0.75"/>
+      <path d="M35,20 C37,14 33,10 35,5" stroke="#C8BEB2" strokeWidth="2.5" strokeLinecap="round"/>
       {/* Legs */}
-      <rect x="5.5" y="44" width="3.5" height="9" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
-      <rect x="12.25" y="45.5" width="3.5" height="7.5" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
-      <rect x="19" y="44" width="3.5" height="9" rx="1.75" stroke="#6A9E82" strokeWidth="1.4"/>
+      <rect x="8" y="62" width="8" height="11" rx="4" fill="#E8E0D6"/>
+      <rect x="22" y="64" width="8" height="9" rx="4" fill="#E8E0D6"/>
+      <rect x="36" y="62" width="8" height="11" rx="4" fill="#E8E0D6"/>
+      {/* Cauldron body — cream/parchment */}
+      <path d="M10,34 C8,38 6,48 6,55 C6,62 13,67 26,67 C39,67 46,62 46,55 C46,48 44,38 42,34 Z" fill="#F0EBE3"/>
+      {/* Left-side depth shading */}
+      <path d="M10,34 C8,38 6,48 6,55 C7,60 11,64 17,66" stroke="#D8D0C4" strokeWidth="6" strokeLinecap="round" opacity="0.55"/>
+      {/* Copper handles */}
+      <path d="M10,40 C3,40 3,56 10,56" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
+      <path d="M42,40 C49,40 49,56 42,56" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
+      {/* Rim ring */}
+      <ellipse cx="26" cy="34" rx="17" ry="4.5" fill="#C8BEB2"/>
+      {/* Green bubbling liquid */}
+      <ellipse cx="26" cy="33" rx="15" ry="3.5" fill="#6A9E82"/>
+      {/* Bubbles */}
+      <circle cx="20" cy="32.5" r="2.5" fill="#7BB595"/>
+      <circle cx="30" cy="34" r="3" fill="#7BB595" opacity="0.9"/>
+      <circle cx="26" cy="30.5" r="1.8" fill="#8CC6A6" opacity="0.8"/>
+      {/* Terra lid dome */}
+      <path d="M10,34 C10,23 42,23 42,34" fill="#C47A5A"/>
+      {/* Lid sheen */}
+      <path d="M14,29 C14,23 38,23 38,29" fill="#CF8560" opacity="0.38"/>
+      {/* Lid knob */}
+      <ellipse cx="26" cy="23.5" rx="6.5" ry="3.5" fill="#B36848"/>
+      <ellipse cx="26" cy="22" rx="5" ry="2.5" fill="#C47A5A"/>
+      <ellipse cx="24.5" cy="20.5" rx="2.8" ry="1.5" fill="#D4896A" opacity="0.5"/>
+      {/* Sparkle accent */}
+      <path d="M41,13 L42,10.5 L43,13 L45.5,14 L43,15 L42,17.5 L41,15 L38.5,14 Z" fill="#C47A5A" opacity="0.65"/>
     </svg>
   );
 }
@@ -84,6 +94,7 @@ export default function App() {
   const [section, setSection] = useState("recipes");
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [search, setSearch] = useState("");
+  const [userRole, setUserRole] = useState("editor");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 680);
@@ -118,6 +129,11 @@ export default function App() {
     ]);
     if (configData?.length) setConfig(prev => ({ ...prev, ...Object.fromEntries(configData.map(r => [r.key, r.value])) }));
     if (plansData) setMealPlans(plansData);
+
+    // Fetch user role — default 'editor' if no profile row (backwards compat for existing user)
+    const { data: profileData } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
+    setUserRole(profileData?.role || "editor");
+
     setLoading(false);
   }
 
@@ -230,11 +246,13 @@ export default function App() {
   }
   if (!session) return <LoginPage />;
 
+  const isEditor = userRole === "editor";
+
   const selectedRecipe   = recipes.find(r => r.id === selected);
   const selectedPlanData = mealPlans.find(p => p.id === selectedPlan);
   const inListView     = !selected && !adding && section === "recipes";
-  const inPlanListView = section === "mealplans" && !selectedPlan;
-  const inTagsView     = section === "tags";
+  const inPlanListView = isEditor && section === "mealplans" && !selectedPlan;
+  const inTagsView     = isEditor && section === "tags";
   const showSidebar    = !isMobile && (inListView || inPlanListView || inTagsView);
 
   const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0",  background: "none", border: "none", outline: "none", padding: 0 };
@@ -274,7 +292,7 @@ export default function App() {
                   <EditableText field="subtitle" baseStyle={subStyle} tag="p" />
                 </div>
               </div>
-              {(inListView || inPlanListView || inTagsView) && (
+              {isEditor && (inListView || inPlanListView || inTagsView) && (
                 <div style={{ display: "flex", gap: "8px" }}>
                   {inListView && (
                     <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
@@ -307,7 +325,7 @@ export default function App() {
           )}
 
           {!loading && !error && !adding && selected && selectedRecipe && (
-            <RecipeDetail recipe={selectedRecipe} tags={tags} onBack={() => setSelected(null)} onSave={handleSave} onDelete={handleDelete} />
+            <RecipeDetail recipe={selectedRecipe} tags={tags} isEditor={isEditor} onBack={() => setSelected(null)} onSave={handleSave} onDelete={handleDelete} />
           )}
 
           {!loading && !error && section === "mealplans" && selectedPlan && selectedPlanData && (
@@ -328,14 +346,18 @@ export default function App() {
                       onClick={() => { setSelectedCategory(cat); setSelectedTagId(null); setSection("recipes"); }}
                     />
                   ))}
-                  <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
-                    <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
-                  </div>
-                  <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Manage</p>
-                    <SidebarBtn label="Tags" active={section === "tags"} onClick={() => { setSection("tags"); setSelected(null); setAdding(false); }} />
-                  </div>
+                  {isEditor && (
+                    <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
+                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
+                      <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
+                    </div>
+                  )}
+                  {isEditor && (
+                    <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
+                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Manage</p>
+                      <SidebarBtn label="Tags" active={section === "tags"} onClick={() => { setSection("tags"); setSelected(null); setAdding(false); }} />
+                    </div>
+                  )}
                 </aside>
               )}
 
@@ -352,18 +374,18 @@ export default function App() {
                         fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
                       }}>{cat === "all" ? "All" : cat}</button>
                     ))}
-                    <button onClick={() => setSection("mealplans")} style={{
+                    {isEditor && <button onClick={() => setSection("mealplans")} style={{
                       padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
                       background: section === "mealplans" ? t.terra : t.surface2,
                       color: section === "mealplans" ? "#fff" : t.inkLight,
                       fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                    }}>Meal plans</button>
-                    <button onClick={() => setSection("tags")} style={{
+                    }}>Meal plans</button>}
+                    {isEditor && <button onClick={() => setSection("tags")} style={{
                       padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
                       background: section === "tags" ? t.green : t.surface2,
                       color: section === "tags" ? "#fff" : t.inkLight,
                       fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                    }}>Tags</button>
+                    }}>Tags</button>}
                   </div>
                 )}
 

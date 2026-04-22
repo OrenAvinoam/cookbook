@@ -66,7 +66,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
       <div style={{ maxWidth: "760px", margin: "0 auto", padding: "0 0 60px 0" }}>
 
         {/* Header */}
-        <div style={{ background: t.ink, padding: "36px 40px 28px", marginBottom: "0" }}>
+        <div style={{ background: t.ink, padding: "36px 40px 28px", marginBottom: "0", printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" }}>
           <div style={{ display: "flex", gap: "20px", alignItems: "center", marginBottom: "16px" }}>
             {recipe.image_url ? (
               <div style={{ width: "72px", height: "72px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "3px solid rgba(255,255,255,0.15)" }}>
@@ -94,7 +94,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
 
         {/* Stats bar */}
         {stats.length > 0 && (
-          <div style={{ background: accentColor, display: "flex", flexWrap: "wrap", gap: "0" }}>
+          <div style={{ background: accentColor, display: "flex", flexWrap: "wrap", gap: "0", printColorAdjust: "exact", WebkitPrintColorAdjust: "exact" }}>
             {stats.map((s, i) => (
               <div key={i} style={{ padding: "12px 20px", borderRight: i < stats.length - 1 ? "1px solid rgba(255,255,255,0.2)" : "none" }}>
                 <div style={{ fontSize: "16px", fontFamily: serif, color: "#fff" }}>{s.v}</div>
@@ -112,10 +112,10 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
               <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>
                 Ingredients {factor !== 1 && <span style={{ opacity: 0.6 }}>· scaled ×{factor}</span>}
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "8px" }}>
+              <div style={{ display: "flex", flexDirection: "column" }}>
                 {recipe.ingredients.map((ing, i) => (
-                  <div key={i} style={{ display: "flex", gap: "12px", alignItems: "baseline", padding: "8px 12px", background: "#F7F3EE", borderRadius: "6px" }}>
-                    <span style={{ fontSize: "14px", color: accentColor, fontFamily: serif, fontWeight: "500", flexShrink: 0, minWidth: "64px" }}>
+                  <div key={i} style={{ display: "flex", gap: "20px", alignItems: "baseline", padding: "7px 0", borderBottom: i < recipe.ingredients.length - 1 ? "1px solid #EEE9E2" : "none" }}>
+                    <span style={{ fontSize: "14px", color: accentColor, fontFamily: serif, fontWeight: "500", flexShrink: 0, minWidth: "90px" }}>
                       {scaleAmount(ing.amount, factor)}
                     </span>
                     <span style={{ fontSize: "14px", color: "#5C4E3C", fontFamily: serif }}>{ing.name}</span>

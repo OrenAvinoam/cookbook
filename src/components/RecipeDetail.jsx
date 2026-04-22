@@ -92,7 +92,7 @@ function NutritionForm({ initial, onSave, onCancel }) {
   );
 }
 
-export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete }) {
+export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, onDelete }) {
   const [tab, setTab] = useState("ingredients");
   const [editing, setEditing] = useState(false);
   const [editingNutrition, setEditingNutrition] = useState(false);
@@ -138,7 +138,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
     setEditingNutrition(false);
   }
 
-  if (editing) {
+  if (editing && isEditor) {
     return (
       <RecipeForm
         initial={recipe}
@@ -166,12 +166,16 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
           <button onClick={() => { setCookMode(m => !m); setCheckedIngredients(new Set()); setCheckedSteps(new Set()); }} style={{ background: cookMode ? accentColor : "transparent", border: `1px solid ${cookMode ? accentColor : t.border}`, color: cookMode ? "#fff" : t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
             {cookMode ? "Exit cook mode" : "Cook mode"}
           </button>
-          <button onClick={() => setEditing(true)} style={{ background: "transparent", border: `1px solid ${accentColor}`, color: accentColor, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-            Edit
-          </button>
-          <button onClick={() => { if (confirm("Delete this recipe?")) onDelete(recipe.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-            Delete
-          </button>
+          {isEditor && (
+            <button onClick={() => setEditing(true)} style={{ background: "transparent", border: `1px solid ${accentColor}`, color: accentColor, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
+              Edit
+            </button>
+          )}
+          {isEditor && (
+            <button onClick={() => { if (confirm("Delete this recipe?")) onDelete(recipe.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
@@ -199,7 +203,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
             )}
             <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h1>
           </div>
-          <p style={{ fontSize: "14px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
+          <p style={{ fontSize: "16px", color: t.inkLight, fontFamily: serif, lineHeight: 1.75, margin: 0 }}>{recipe.description}</p>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px", alignItems: "center", gap: "0" }}>

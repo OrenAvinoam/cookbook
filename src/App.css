@@ -6,6 +6,19 @@
 @media print {
   body * { visibility: hidden; }
   .print-view, .print-view * { visibility: visible; }
-  .print-view { position: fixed !important; inset: 0 !important; overflow: visible !important; }
+  .print-view {
+    position: fixed !important;
+    inset: 0 !important;
+    overflow: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  .print-view * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  .no-print { display: none !important; }
   @page { margin: 0; size: A4; }
 }

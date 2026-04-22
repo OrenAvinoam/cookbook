@@ -50,7 +50,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
 
       {/* Emoji + title row, vertically centered */}
       <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "10px" }}>
-        <span style={{ fontSize: "40px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center" }}>{recipe.emoji}</span>
+        <span style={{ fontSize: "40px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center", fontFamily: "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif" }}>{recipe.emoji}</span>
         <h2 style={{ fontSize: "22px", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h2>
       </div>
 

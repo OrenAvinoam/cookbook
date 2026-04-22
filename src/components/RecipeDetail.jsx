@@ -134,7 +134,7 @@ export default function RecipeDetail({ recipe, tags, onBack, onSave, onDelete })
             ))}
           </div>
           <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "10px" }}>
-            <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center" }}>{recipe.emoji}</span>
+            <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center", fontFamily: "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif" }}>{recipe.emoji}</span>
             <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h1>
           </div>
           <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>

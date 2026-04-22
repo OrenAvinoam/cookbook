@@ -5,10 +5,10 @@ export default function IngredientList({ ingredients, accentColor }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       {ingredients.map((ing, i) => (
         <div key={i} style={{ display: "flex", gap: "12px", alignItems: "baseline", padding: "10px 14px", background: t.surface2, borderRadius: "8px", border: `1px solid ${t.border}` }}>
-          <span style={{ fontSize: "13px", color: accentColor, fontFamily: serif, fontWeight: "600", flexShrink: 0, minWidth: "70px" }}>
+          <span style={{ fontSize: "15px", color: accentColor, fontFamily: serif, fontWeight: "600", flexShrink: 0, minWidth: "70px" }}>
             {ing.amount}
           </span>
-          <span style={{ fontSize: "13px", color: t.inkMid, fontFamily: serif }}>{ing.name}</span>
+          <span style={{ fontSize: "15px", color: t.inkMid, fontFamily: serif }}>{ing.name}</span>
         </div>
       ))}
     </div>

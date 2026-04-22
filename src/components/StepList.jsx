@@ -32,7 +32,7 @@ export default function StepList({ steps, accentColor }) {
               <span style={{ fontSize: "11px", color: t.inkFaint }}>{isOpen ? "▲" : "▼"}</span>
             </div>
             {isOpen && (
-              <div style={{ padding: "12px 16px 16px 56px", fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.75, borderTop: `1px solid ${t.border}`, animation: "fadeSlideIn 0.18s ease" }}>
+              <div style={{ padding: "12px 16px 16px 56px", fontSize: "15px", color: t.inkLight, fontFamily: serif, lineHeight: 1.75, borderTop: `1px solid ${t.border}`, animation: "fadeSlideIn 0.18s ease" }}>
                 {step.body}
               </div>
             )}

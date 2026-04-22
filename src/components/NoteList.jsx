@@ -6,7 +6,7 @@ export default function NoteList({ notes, accentColor }) {
       {notes.map((note, i) => (
         <div key={i} style={{ background: t.surface, border: `1px solid ${t.border}`, borderLeft: `3px solid ${accentColor}`, borderRadius: "8px", padding: "14px 18px" }}>
           <p style={{ fontSize: "10px", color: accentColor, fontFamily: sans, textTransform: "uppercase", letterSpacing: "0.14em", margin: "0 0 6px 0" }}>{note.title}</p>
-          <p style={{ fontSize: "13px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{note.body}</p>
+          <p style={{ fontSize: "15px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: 0 }}>{note.body}</p>
         </div>
       ))}
     </div>

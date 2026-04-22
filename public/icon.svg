@@ -6,16 +6,11 @@
   <path d="M256,122 C241,84 271,52 256,14" stroke="#C8BEB2" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.8"/>
   <path d="M347,132 C362,96 332,64 347,28" stroke="#C8BEB2" stroke-width="16" fill="none" stroke-linecap="round"/>
 
-  <!-- Legs -->
-  <rect x="106" y="414" width="72" height="80" rx="36" fill="#E8E0D6"/>
-  <rect x="220" y="430" width="72" height="64" rx="32" fill="#E8E0D6"/>
-  <rect x="334" y="414" width="72" height="80" rx="36" fill="#E8E0D6"/>
-
-  <!-- Cauldron body (cream/parchment) -->
-  <path d="M96,216 C76,242 60,320 64,370 C68,418 138,452 256,452 C374,452 444,418 448,370 C452,320 436,242 416,216 Z" fill="#F0EBE3"/>
+  <!-- Cauldron body (cream/parchment) — no legs -->
+  <path d="M96,216 C76,242 60,320 64,380 C68,430 138,468 256,468 C374,468 444,430 448,380 C452,320 436,242 416,216 Z" fill="#F0EBE3"/>
 
   <!-- Body left-side depth shading -->
-  <path d="M96,216 C76,242 60,320 64,370 C66,398 96,426 138,440" stroke="#D8D0C4" stroke-width="52" stroke-linecap="round" fill="none" opacity="0.45"/>
+  <path d="M96,216 C76,242 60,320 64,380 C66,410 96,440 138,456" stroke="#D8D0C4" stroke-width="52" stroke-linecap="round" fill="none" opacity="0.45"/>
 
   <!-- Copper handles -->
   <path d="M96,262 C34,262 34,372 96,372" stroke="#C47A5A" stroke-width="40" fill="none" stroke-linecap="round"/>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { t, serif, sans } from "../theme";
+import { t, serif, sans, body } from "../theme";
 import IngredientList from "./IngredientList";
 import StepList from "./StepList";
 import NoteList from "./NoteList";
@@ -203,7 +203,7 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
             )}
             <h1 style={{ fontSize: "clamp(22px, 5vw, 34px)", fontWeight: "400", color: t.ink, margin: 0, fontFamily: serif }}>{recipe.title}</h1>
           </div>
-          <p style={{ fontSize: "16px", color: t.inkLight, fontFamily: serif, lineHeight: 1.75, margin: 0 }}>{recipe.description}</p>
+          <p style={{ fontSize: "20px", color: t.inkLight, fontFamily: body, lineHeight: 1.7, margin: 0 }}>{recipe.description}</p>
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px", alignItems: "center", gap: "0" }}>

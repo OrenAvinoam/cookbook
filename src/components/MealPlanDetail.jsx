@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { t, serif, sans } from "../theme";
+import { t, serif, sans, body } from "../theme";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
@@ -87,27 +87,56 @@ function aggregateIngredients(ings) {
   });
 }
 
+// Normalize both old ("uuid") and new ({type, id, note}) item formats
+function normalizeDayItems(arr) {
+  return (arr || []).map(item =>
+    typeof item === "string" ? { type: "recipe", id: item, note: "" } : item
+  );
+}
+
 export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete }) {
-  const normalize = (raw) => Object.fromEntries(DAYS.map(d => [d, (raw || {})[d] || []]));
+  const normalize = (raw) => Object.fromEntries(
+    DAYS.map(d => [d, normalizeDayItems((raw || {})[d])])
+  );
+
   const [localDays, setLocalDays] = useState(() => normalize(plan.days));
-  const [localNotes, setLocalNotes] = useState(() => plan.day_notes || {});
   const [name, setName] = useState(plan.name);
+  const [isEditingName, setIsEditingName] = useState(false);
   const [saving, setSaving] = useState(false);
   const [addingToDay, setAddingToDay] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [expandedNotes, setExpandedNotes] = useState({});
 
   const getRecipe = (id) => recipes.find(r => r.id === id);
 
-  const addRecipe = (day, recipeId) => { setLocalDays(d => ({ ...d, [day]: [...d[day], recipeId] })); setAddingToDay(null); };
-  const removeRecipe = (day, idx) => setLocalDays(d => ({ ...d, [day]: d[day].filter((_, i) => i !== idx) }));
+  const addRecipe = (day, recipeId) => {
+    setLocalDays(d => ({ ...d, [day]: [...d[day], { type: "recipe", id: recipeId, note: "" }] }));
+    setAddingToDay(null);
+  };
+
+  const removeItem = (day, idx) =>
+    setLocalDays(d => ({ ...d, [day]: d[day].filter((_, i) => i !== idx) }));
+
+  const updateItemNote = (day, idx, note) =>
+    setLocalDays(d => ({
+      ...d,
+      [day]: d[day].map((item, i) => i === idx ? { ...item, note } : item),
+    }));
+
+  const toggleNote = (day, idx) => {
+    const key = `${day}-${idx}`;
+    setExpandedNotes(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const handleSave = async () => {
     setSaving(true);
-    try { await onSave({ ...plan, name, days: localDays, day_notes: localNotes }); }
+    try { await onSave({ ...plan, name, days: localDays }); }
     finally { setSaving(false); }
   };
 
-  const allIngredients = Object.values(localDays).flat().flatMap(id => getRecipe(id)?.ingredients || []);
+  const allIngredients = Object.values(localDays).flat()
+    .filter(item => item.type === "recipe")
+    .flatMap(item => getRecipe(item.id)?.ingredients || []);
   const shoppingList = aggregateIngredients(allIngredients);
 
   const copyShoppingList = () => {
@@ -118,12 +147,17 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
     });
   };
 
-  const uniqueIds = [...new Set(Object.values(localDays).flat())];
+  const uniqueRecipeIds = [...new Set(
+    Object.values(localDays).flat().filter(i => i.type === "recipe").map(i => i.id)
+  )];
   const totals = {};
-  uniqueIds.forEach(id => {
+  uniqueRecipeIds.forEach(id => {
     const r = getRecipe(id);
     if (!r?.nutrition) return;
-    NUTRITION_FIELDS.forEach(({ key }) => { const v = r.nutrition[key]; if (v != null) totals[key] = (totals[key] || 0) + v; });
+    NUTRITION_FIELDS.forEach(({ key }) => {
+      const v = r.nutrition[key];
+      if (v != null) totals[key] = (totals[key] || 0) + v;
+    });
   });
   const dailyAvg = Object.fromEntries(Object.entries(totals).map(([k, v]) => [k, +(v / 7).toFixed(1)]));
   const hasNutrition = Object.keys(totals).length > 0;
@@ -149,10 +183,26 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
         </div>
       </div>
 
-      <input
-        value={name} onChange={e => setName(e.target.value)} placeholder="Plan name"
-        style={{ fontFamily: serif, fontSize: "28px", color: t.ink, background: "transparent", border: "none", borderBottom: `2px solid ${t.border}`, outline: "none", width: "100%", padding: "4px 0", marginBottom: "4px", boxSizing: "border-box" }}
-      />
+      {/* Plan name — static with edit button */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+        {isEditingName ? (
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onBlur={() => setIsEditingName(false)}
+            onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") setIsEditingName(false); }}
+            autoFocus
+            style={{ fontFamily: serif, fontSize: "28px", color: t.ink, background: "transparent", border: "none", borderBottom: `2px solid ${t.green}`, outline: "none", flex: 1, padding: "4px 0", boxSizing: "border-box" }}
+          />
+        ) : (
+          <h2 style={{ fontFamily: serif, fontSize: "28px", fontWeight: "400", color: t.ink, margin: 0, flex: 1 }}>{name}</h2>
+        )}
+        {!isEditingName && (
+          <button onClick={() => setIsEditingName(true)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, cursor: "pointer", padding: "4px 10px", borderRadius: "6px", fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em", flexShrink: 0 }}>
+            ✎ Edit
+          </button>
+        )}
+      </div>
 
       {sectionHdr("Week")}
 
@@ -162,14 +212,30 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
             <div key={day} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "8px", padding: "10px 8px 8px", display: "flex", flexDirection: "column", gap: "4px" }}>
               <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 0", paddingBottom: "6px", borderBottom: `1px solid ${t.surface2}`, textAlign: "center" }}>{day.slice(0, 3)}</p>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
-                {localDays[day].map((recipeId, idx) => {
-                  const r = getRecipe(recipeId);
+                {localDays[day].map((item, idx) => {
+                  if (item.type !== "recipe") return null;
+                  const r = getRecipe(item.id);
                   if (!r) return null;
+                  const noteKey = `${day}-${idx}`;
+                  const noteOpen = expandedNotes[noteKey];
                   return (
-                    <div key={idx} style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 5px", background: t.surface2, borderRadius: "5px" }}>
-                      <span style={{ fontSize: "13px", fontFamily: EMOJI_FONT, flexShrink: 0, lineHeight: 1 }}>{r.emoji}</span>
-                      <span style={{ fontSize: "11px", fontFamily: serif, color: t.ink, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.title}</span>
-                      <button onClick={() => removeRecipe(day, idx)} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", padding: 0, fontSize: "14px", lineHeight: 1, flexShrink: 0 }}>×</button>
+                    <div key={idx} style={{ background: t.surface2, borderRadius: "5px", overflow: "hidden" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 5px" }}>
+                        <span style={{ fontSize: "13px", fontFamily: EMOJI_FONT, flexShrink: 0, lineHeight: 1 }}>{r.emoji}</span>
+                        <span style={{ fontSize: "11px", fontFamily: serif, color: t.ink, flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.title}</span>
+                        <button onClick={() => toggleNote(day, idx)} style={{ background: "none", border: "none", color: item.note ? t.green : t.inkFaint, cursor: "pointer", padding: "0 2px", fontSize: "10px", lineHeight: 1, flexShrink: 0 }} title="Note">✎</button>
+                        <button onClick={() => removeItem(day, idx)} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", padding: 0, fontSize: "14px", lineHeight: 1, flexShrink: 0 }}>×</button>
+                      </div>
+                      {noteOpen && (
+                        <textarea
+                          value={item.note || ""}
+                          onChange={e => updateItemNote(day, idx, e.target.value)}
+                          placeholder="Note for this recipe…"
+                          rows={2}
+                          autoFocus
+                          style={{ width: "100%", fontFamily: sans, fontSize: "10px", color: t.inkLight, background: "transparent", border: "none", borderTop: `1px solid ${t.border}`, padding: "4px 6px", outline: "none", resize: "none", boxSizing: "border-box" }}
+                        />
+                      )}
                     </div>
                   );
                 })}
@@ -183,14 +249,6 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
               ) : (
                 <button onClick={() => setAddingToDay(day)} style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "10px", letterSpacing: "0.06em", padding: "5px 4px", borderRadius: "5px", cursor: "pointer" }}>+ Add</button>
               )}
-              {/* Day note */}
-              <textarea
-                value={localNotes[day] || ""}
-                onChange={e => setLocalNotes(n => ({ ...n, [day]: e.target.value }))}
-                placeholder="Note…"
-                rows={2}
-                style={{ width: "100%", fontFamily: sans, fontSize: "10px", color: t.inkLight, background: "transparent", border: `1px solid ${t.border}`, borderRadius: "5px", padding: "4px 6px", outline: "none", resize: "none", boxSizing: "border-box", marginTop: "4px" }}
-              />
             </div>
           ))}
         </div>
@@ -228,8 +286,8 @@ export default function MealPlanDetail({ plan, recipes, onBack, onSave, onDelete
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "6px" }}>
             {shoppingList.map((item, i) => (
               <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "10px", padding: "8px 12px", background: t.surface, border: `1px solid ${t.border}`, borderRadius: "7px" }}>
-                <span style={{ fontSize: "14px", color: t.green, fontFamily: serif, fontWeight: "500", flexShrink: 0, minWidth: "60px" }}>{item.amount}</span>
-                <span style={{ fontSize: "14px", color: t.inkMid, fontFamily: serif }}>{item.name}</span>
+                <span style={{ fontSize: "16px", color: t.green, fontFamily: body, fontWeight: "500", flexShrink: 0, minWidth: "60px" }}>{item.amount}</span>
+                <span style={{ fontSize: "16px", color: t.inkMid, fontFamily: body }}>{item.name}</span>
               </div>
             ))}
           </div>

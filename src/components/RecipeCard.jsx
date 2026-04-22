@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { t, serif, sans } from "../theme";
+import { t, serif, sans, body } from "../theme";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
@@ -73,7 +73,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
       </div>
 
       {/* Description */}
-      <p style={{ fontSize: "15px", color: t.inkLight, fontFamily: serif, lineHeight: 1.7, margin: "0 0 12px 0" }}>{recipe.description}</p>
+      <p style={{ fontSize: "18px", color: t.inkLight, fontFamily: body, lineHeight: 1.65, margin: "0 0 12px 0" }}>{recipe.description}</p>
 
       {/* Footer */}
       <p style={{ fontSize: "12px", color: t.inkFaint, fontFamily: sans, margin: 0 }}>

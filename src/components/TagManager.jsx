@@ -71,6 +71,14 @@ export default function TagManager({ tags, onCreate, onUpdate, onDelete }) {
 
       <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: `1px solid ${t.border}` }}>
         <p style={{ fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 12px 0" }}>New tag</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+          {["#6A9E82","#C47A5A","#8B6FA6","#4A8FA8","#D4A847","#A85858","#5A8FA8","#7AB87A","#B87AB8","#D47A47","#4A7A8A","#8A7A50","#A8B87A","#7A8AB8","#B85A7A"].map(c => (
+            <button key={c} onClick={() => setNewColor(c)} style={{
+              width: "22px", height: "22px", borderRadius: "50%", background: c, border: `2px solid ${newColor === c ? t.ink : "transparent"}`,
+              cursor: "pointer", padding: 0, flexShrink: 0, transition: "border-color 0.15s",
+            }} title={c} />
+          ))}
+        </div>
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <input type="color" value={newColor} onChange={(e) => setNewColor(e.target.value)} style={{ width: "36px", height: "34px", border: `1px solid ${t.border}`, borderRadius: "6px", cursor: "pointer", padding: "2px", flexShrink: 0 }} />
           <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleCreate()} placeholder="Tag name" style={{ ...inputStyle }} />

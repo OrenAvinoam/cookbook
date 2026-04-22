@@ -8,6 +8,7 @@ import TagManager from "./components/TagManager";
 import LoginPage from "./components/LoginPage";
 import MealPlanList from "./components/MealPlanList";
 import MealPlanDetail from "./components/MealPlanDetail";
+import IngredientCatalogue from "./components/IngredientCatalogue";
 import "./App.css";
 
 const CATEGORIES = ["all", "breakfast", "lunch", "dinner", "snack", "dessert"];
@@ -41,40 +42,33 @@ function SidebarBtn({ label, active, onClick }) {
 
 function CauldronMark() {
   return (
-    <svg width="52" height="74" viewBox="0 0 52 74" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
-      {/* Steam - cream colored wisps */}
-      <path d="M17,20 C15,14 19,10 17,5" stroke="#C8BEB2" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M26,18 C24,12 28,8 26,3" stroke="#C8BEB2" strokeWidth="2" strokeLinecap="round" opacity="0.75"/>
-      <path d="M35,20 C37,14 33,10 35,5" stroke="#C8BEB2" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Legs */}
-      <rect x="8" y="62" width="8" height="11" rx="4" fill="#E8E0D6"/>
-      <rect x="22" y="64" width="8" height="9" rx="4" fill="#E8E0D6"/>
-      <rect x="36" y="62" width="8" height="11" rx="4" fill="#E8E0D6"/>
-      {/* Cauldron body — cream/parchment */}
-      <path d="M10,34 C8,38 6,48 6,55 C6,62 13,67 26,67 C39,67 46,62 46,55 C46,48 44,38 42,34 Z" fill="#F0EBE3"/>
-      {/* Left-side depth shading */}
-      <path d="M10,34 C8,38 6,48 6,55 C7,60 11,64 17,66" stroke="#D8D0C4" strokeWidth="6" strokeLinecap="round" opacity="0.55"/>
-      {/* Copper handles */}
-      <path d="M10,40 C3,40 3,56 10,56" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
-      <path d="M42,40 C49,40 49,56 42,56" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
-      {/* Rim ring */}
-      <ellipse cx="26" cy="34" rx="17" ry="4.5" fill="#C8BEB2"/>
-      {/* Green bubbling liquid */}
-      <ellipse cx="26" cy="33" rx="15" ry="3.5" fill="#6A9E82"/>
+    <svg width="48" height="68" viewBox="0 0 48 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+      {/* Steam */}
+      <path d="M15,15 C13,9 17,5 15,0" stroke="#C8BEB2" strokeWidth="2.4" strokeLinecap="round"/>
+      <path d="M24,13 C22,7 26,3 24,0" stroke="#C8BEB2" strokeWidth="1.9" strokeLinecap="round" opacity="0.72"/>
+      <path d="M33,15 C35,9 31,5 33,0" stroke="#C8BEB2" strokeWidth="2.4" strokeLinecap="round"/>
+      {/* Body — no legs */}
+      <path d="M7,28 C3,36 2,50 4,58 C7,64 15,68 24,68 C33,68 41,64 44,58 C46,50 45,36 41,28 Z" fill="#F0EBE3"/>
+      {/* Depth shading */}
+      <path d="M7,28 C4,36 3,48 5,56" stroke="#D8D0C4" strokeWidth="5" strokeLinecap="round" opacity="0.42"/>
+      {/* Handles */}
+      <path d="M7,35 C0,35 0,51 7,51" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
+      <path d="M41,35 C48,35 48,51 41,51" stroke="#C47A5A" strokeWidth="5.5" fill="none" strokeLinecap="round"/>
+      {/* Rim */}
+      <ellipse cx="24" cy="28" rx="17" ry="4.5" fill="#C8BEB2"/>
+      {/* Green liquid */}
+      <ellipse cx="24" cy="27" rx="15.5" ry="3.5" fill="#6A9E82"/>
       {/* Bubbles */}
-      <circle cx="20" cy="32.5" r="2.5" fill="#7BB595"/>
-      <circle cx="30" cy="34" r="3" fill="#7BB595" opacity="0.9"/>
-      <circle cx="26" cy="30.5" r="1.8" fill="#8CC6A6" opacity="0.8"/>
-      {/* Terra lid dome */}
-      <path d="M10,34 C10,23 42,23 42,34" fill="#C47A5A"/>
-      {/* Lid sheen */}
-      <path d="M14,29 C14,23 38,23 38,29" fill="#CF8560" opacity="0.38"/>
-      {/* Lid knob */}
-      <ellipse cx="26" cy="23.5" rx="6.5" ry="3.5" fill="#B36848"/>
-      <ellipse cx="26" cy="22" rx="5" ry="2.5" fill="#C47A5A"/>
-      <ellipse cx="24.5" cy="20.5" rx="2.8" ry="1.5" fill="#D4896A" opacity="0.5"/>
-      {/* Sparkle accent */}
-      <path d="M41,13 L42,10.5 L43,13 L45.5,14 L43,15 L42,17.5 L41,15 L38.5,14 Z" fill="#C47A5A" opacity="0.65"/>
+      <circle cx="19" cy="26.5" r="2.2" fill="#7BB595"/>
+      <circle cx="28" cy="28" r="2.7" fill="#7BB595" opacity="0.9"/>
+      {/* Lid */}
+      <path d="M7,28 C7,17 41,17 41,28" fill="#C47A5A"/>
+      <path d="M11,24 C11,18 37,18 37,24" fill="#CF8560" opacity="0.34"/>
+      {/* Knob */}
+      <ellipse cx="24" cy="17.5" rx="6.5" ry="3.5" fill="#B36848"/>
+      <ellipse cx="24" cy="16" rx="5" ry="2.5" fill="#C47A5A"/>
+      {/* Sparkle */}
+      <path d="M38,8 L39,5.5 L40,8 L42.5,9 L40,10 L39,12.5 L38,10 L35.5,9 Z" fill="#C47A5A" opacity="0.65"/>
     </svg>
   );
 }
@@ -87,6 +81,9 @@ export default function App() {
   const [recipes, setRecipes] = useState([]);
   const [tags, setTags] = useState([]);
   const [mealPlans, setMealPlans] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
+  const [ingredientCategories, setIngredientCategories] = useState([]);
+  const [ingredientMappings, setIngredientMappings] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedTagId, setSelectedTagId] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -133,6 +130,15 @@ export default function App() {
     // Fetch user role — default 'editor' if no profile row (backwards compat for existing user)
     const { data: profileData } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
     setUserRole(profileData?.role || "editor");
+
+    const [{ data: ingrData }, { data: catData }, { data: mapData }] = await Promise.all([
+      supabase.from("ingredients").select("*").order("name"),
+      supabase.from("ingredient_categories").select("*").order("sort_order"),
+      supabase.from("ingredient_usda_mapping").select("*"),
+    ]);
+    if (ingrData) setIngredients(ingrData);
+    if (catData) setIngredientCategories(catData);
+    if (mapData) setIngredientMappings(mapData);
 
     setLoading(false);
   }
@@ -229,6 +235,43 @@ export default function App() {
     setMealPlans(prev => prev.map(p => p.id === id ? { ...p, name } : p));
   }
 
+  async function handleCreateIngredient(data) {
+    const { data: row, error } = await supabase.from("ingredients").insert(data).select().single();
+    if (error) throw error;
+    setIngredients(prev => [...prev, row].sort((a, b) => a.name.localeCompare(b.name)));
+    return row;
+  }
+
+  async function handleUpdateIngredient(id, updates) {
+    const { error } = await supabase.from("ingredients").update(updates).eq("id", id);
+    if (error) throw error;
+    setIngredients(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+  }
+
+  async function handleDeleteIngredient(id) {
+    const { error } = await supabase.from("ingredients").delete().eq("id", id);
+    if (error) throw error;
+    setIngredients(prev => prev.filter(i => i.id !== id));
+    setIngredientMappings(prev => prev.filter(m => m.ingredient_id !== id));
+  }
+
+  async function handleCreateCategory(data) {
+    const { data: row, error } = await supabase.from("ingredient_categories").insert(data).select().single();
+    if (error) throw error;
+    setIngredientCategories(prev => [...prev, row].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)));
+    return row;
+  }
+
+  async function handleSaveMapping(ingredientId, mapping) {
+    const payload = { ingredient_id: ingredientId, ...mapping };
+    const { data: row, error } = await supabase.from("ingredient_usda_mapping").upsert(payload, { onConflict: "ingredient_id" }).select().single();
+    if (error) throw error;
+    setIngredientMappings(prev => {
+      const filtered = prev.filter(m => m.ingredient_id !== ingredientId);
+      return [...filtered, row];
+    });
+  }
+
   async function handleCreatePlan() {
     const days = Object.fromEntries(DAYS.map(d => [d, []]));
     const { data, error } = await supabase.from("meal_plans").insert({ name: "Week Plan", days }).select().single();
@@ -250,10 +293,11 @@ export default function App() {
 
   const selectedRecipe   = recipes.find(r => r.id === selected);
   const selectedPlanData = mealPlans.find(p => p.id === selectedPlan);
-  const inListView     = !selected && !adding && section === "recipes";
-  const inPlanListView = isEditor && section === "mealplans" && !selectedPlan;
-  const inTagsView     = isEditor && section === "tags";
-  const showSidebar    = !isMobile && (inListView || inPlanListView || inTagsView);
+  const inListView         = !selected && !adding && section === "recipes";
+  const inPlanListView     = isEditor && section === "mealplans" && !selectedPlan;
+  const inTagsView         = isEditor && section === "tags";
+  const inIngredientsView  = section === "ingredients";
+  const showSidebar        = !isMobile && (inListView || inPlanListView || inTagsView || inIngredientsView);
 
   const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0",  background: "none", border: "none", outline: "none", padding: 0 };
   const titleStyle = { fontSize: "clamp(22px, 4vw, 36px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em", background: "none", border: "none", outline: "none", padding: 0 };
@@ -332,7 +376,7 @@ export default function App() {
             <MealPlanDetail plan={selectedPlanData} recipes={recipes} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
           )}
 
-          {!loading && !error && (inListView || inPlanListView || inTagsView) && (
+          {!loading && !error && (inListView || inPlanListView || inTagsView || inIngredientsView) && (
             <div style={{ display: "flex", alignItems: "flex-start" }}>
 
               {/* Desktop sidebar */}
@@ -352,6 +396,10 @@ export default function App() {
                       <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
                     </div>
                   )}
+                  <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
+                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Ingredients</p>
+                    <SidebarBtn label="Catalogue" active={section === "ingredients"} onClick={() => { setSection("ingredients"); setSelected(null); setAdding(false); }} />
+                  </div>
                   {isEditor && (
                     <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
                       <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Manage</p>
@@ -386,6 +434,12 @@ export default function App() {
                       color: section === "tags" ? "#fff" : t.inkLight,
                       fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
                     }}>Tags</button>}
+                    <button onClick={() => setSection("ingredients")} style={{
+                      padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
+                      background: section === "ingredients" ? t.green : t.surface2,
+                      color: section === "ingredients" ? "#fff" : t.inkLight,
+                      fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                    }}>Ingredients</button>
                   </div>
                 )}
 
@@ -452,6 +506,21 @@ export default function App() {
                 {/* Tags section */}
                 {section === "tags" && (
                   <TagManager tags={tags} onCreate={createTag} onUpdate={updateTag} onDelete={deleteTag} />
+                )}
+
+                {/* Ingredients catalogue */}
+                {section === "ingredients" && (
+                  <IngredientCatalogue
+                    ingredients={ingredients}
+                    categories={ingredientCategories}
+                    mappings={ingredientMappings}
+                    isEditor={isEditor}
+                    onCreate={handleCreateIngredient}
+                    onUpdate={handleUpdateIngredient}
+                    onDelete={handleDeleteIngredient}
+                    onCreateCategory={handleCreateCategory}
+                    onSaveMapping={handleSaveMapping}
+                  />
                 )}
               </main>
             </div>

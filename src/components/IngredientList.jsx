@@ -1,4 +1,4 @@
-import { t, serif, sans } from "../theme";
+import { t, serif, sans, body } from "../theme";
 
 export default function IngredientList({ ingredients, accentColor, cookMode, checkedItems, onToggle }) {
   return (
@@ -30,14 +30,14 @@ export default function IngredientList({ ingredients, accentColor, cookMode, che
               </div>
             )}
             <span style={{
-              fontSize: "16px", color: accentColor, fontFamily: serif, fontWeight: "500",
-              flexShrink: 0, minWidth: "70px",
+              fontSize: "20px", color: accentColor, fontFamily: body, fontWeight: "500",
+              flexShrink: 0, minWidth: "80px",
               textDecoration: checked ? "line-through" : "none",
             }}>
               {ing.amount}
             </span>
             <span style={{
-              fontSize: "16px", color: t.inkMid, fontFamily: serif,
+              fontSize: "20px", color: t.inkMid, fontFamily: body,
               textDecoration: checked ? "line-through" : "none",
             }}>{ing.name}</span>
           </div>

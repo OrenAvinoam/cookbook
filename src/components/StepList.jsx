@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { t, serif, sans } from "../theme";
+import { t, serif, sans, body } from "../theme";
 
 function parseTimeToSeconds(str) {
   if (!str || str === "—") return null;
@@ -107,7 +107,7 @@ export default function StepList({ steps, accentColor, cookMode, checkedSteps, o
 
             {isOpen && (
               <div style={{ padding: "12px 16px 16px 56px", borderTop: `1px solid ${t.border}`, animation: "fadeSlideIn 0.18s ease" }}>
-                <p style={{ fontSize: "16px", color: t.inkLight, fontFamily: serif, lineHeight: 1.8, margin: "0 0 12px 0" }}>
+                <p style={{ fontSize: "20px", color: t.inkLight, fontFamily: body, lineHeight: 1.75, margin: "0 0 12px 0" }}>
                   {step.body}
                 </p>
                 {totalSecs && (

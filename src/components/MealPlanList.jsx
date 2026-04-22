@@ -1,6 +1,26 @@
+import { useState } from "react";
 import { t, serif, sans } from "../theme";
 
-export default function MealPlanList({ plans, onCreate, onOpen }) {
+export default function MealPlanList({ plans, onCreate, onOpen, onDelete, onRename }) {
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+
+  const startRename = (e, plan) => {
+    e.stopPropagation();
+    setEditingId(plan.id);
+    setEditName(plan.name);
+  };
+
+  const saveRename = (id) => {
+    if (editName.trim() && onRename) onRename(id, editName.trim());
+    setEditingId(null);
+  };
+
+  const handleDelete = (e, id) => {
+    e.stopPropagation();
+    if (confirm("Delete this meal plan?")) onDelete(id);
+  };
+
   if (plans.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "60px 0" }}>
@@ -18,21 +38,46 @@ export default function MealPlanList({ plans, onCreate, onOpen }) {
       {plans.map(plan => {
         const totalSlots = Object.values(plan.days || {}).flat().length;
         const uniqueCount = new Set(Object.values(plan.days || {}).flat()).size;
+        const isEditing = editingId === plan.id;
+
         return (
           <div
             key={plan.id}
-            onClick={() => onOpen(plan.id)}
-            style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "10px", padding: "18px 22px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "border-color 0.2s, box-shadow 0.2s" }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = t.green + "60"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(106,158,130,0.1)"; }}
+            onClick={() => !isEditing && onOpen(plan.id)}
+            style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "10px", padding: "16px 20px", cursor: isEditing ? "default" : "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", transition: "border-color 0.2s, box-shadow 0.2s" }}
+            onMouseEnter={e => { if (!isEditing) { e.currentTarget.style.borderColor = t.green + "60"; e.currentTarget.style.boxShadow = "0 4px 16px rgba(106,158,130,0.1)"; } }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = t.border; e.currentTarget.style.boxShadow = "none"; }}
           >
-            <div>
-              <p style={{ fontFamily: serif, fontSize: "18px", color: t.ink, margin: "0 0 4px 0" }}>{plan.name}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {isEditing ? (
+                <input
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  onBlur={() => saveRename(plan.id)}
+                  onKeyDown={e => { e.stopPropagation(); if (e.key === "Enter") saveRename(plan.id); if (e.key === "Escape") setEditingId(null); }}
+                  onClick={e => e.stopPropagation()}
+                  autoFocus
+                  style={{ fontFamily: serif, fontSize: "18px", color: t.ink, background: "transparent", border: "none", borderBottom: `1px solid ${t.border}`, outline: "none", width: "100%", padding: "2px 0" }}
+                />
+              ) : (
+                <p
+                  onClick={e => startRename(e, plan)}
+                  style={{ fontFamily: serif, fontSize: "18px", color: t.ink, margin: "0 0 4px 0", cursor: "text" }}
+                  title="Click to rename"
+                >{plan.name}</p>
+              )}
               <p style={{ fontFamily: sans, fontSize: "11px", color: t.inkFaint, margin: 0, letterSpacing: "0.08em" }}>
                 {uniqueCount} {uniqueCount === 1 ? "recipe" : "recipes"} · {totalSlots} {totalSlots === 1 ? "serving" : "servings"} planned
               </p>
             </div>
-            <span style={{ color: t.green, fontFamily: sans, fontSize: "12px", flexShrink: 0 }}>Open →</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+              {!isEditing && <span style={{ color: t.green, fontFamily: sans, fontSize: "12px" }}>Open →</span>}
+              <button
+                onClick={e => handleDelete(e, plan.id)}
+                style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, borderRadius: "6px", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "16px", flexShrink: 0 }}
+                title="Delete plan"
+              >×</button>
+            </div>
           </div>
         );
       })}

@@ -18,6 +18,27 @@ const DEFAULT_CONFIG = {
   subtitle: "Collagen · Skin Health · Carnivore Protocol",
 };
 
+function SidebarBtn({ label, active, onClick }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "block", width: "100%", textAlign: "left",
+        padding: "8px 12px 8px 9px",
+        borderRadius: "8px", border: "none",
+        borderLeft: active ? `3px solid ${t.green}` : "3px solid transparent",
+        background: active ? t.ink : hovered ? t.green + "22" : "transparent",
+        color: active ? "#fff" : hovered ? t.inkMid : t.inkLight,
+        fontFamily: sans, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase",
+        cursor: "pointer", transition: "background 0.18s, color 0.18s", marginBottom: "2px",
+      }}
+    >{label}</button>
+  );
+}
+
 function BotanicalSprig() {
   return (
     <svg width="28" height="56" viewBox="0 0 28 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
@@ -160,6 +181,12 @@ export default function App() {
     setSelectedPlan(null);
   }
 
+  async function handleRenamePlan(id, name) {
+    const { error } = await supabase.from("meal_plans").update({ name }).eq("id", id);
+    if (error) { alert("Rename failed: " + error.message); return; }
+    setMealPlans(prev => prev.map(p => p.id === id ? { ...p, name } : p));
+  }
+
   async function handleCreatePlan() {
     const days = Object.fromEntries(DAYS.map(d => [d, []]));
     const { data, error } = await supabase.from("meal_plans").insert({ name: "Week Plan", days }).select().single();
@@ -203,16 +230,6 @@ export default function App() {
     return <Tag onClick={() => startEdit(field)} style={{ ...baseStyle, cursor: "text" }} title="Click to edit">{config[field]}</Tag>;
   };
 
-  const sidebarBtn = (label, active, onClick) => (
-    <button onClick={onClick} style={{
-      display: "block", width: "100%", textAlign: "left", padding: "8px 12px",
-      borderRadius: "8px", border: "none",
-      background: active ? t.ink : "transparent",
-      color: active ? "#fff" : t.inkLight,
-      fontFamily: sans, fontSize: "12px", letterSpacing: "0.06em", textTransform: "capitalize",
-      cursor: "pointer", transition: "background 0.18s, color 0.18s", marginBottom: "2px",
-    }}>{label}</button>
-  );
 
   return (
     <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }}>
@@ -283,14 +300,16 @@ export default function App() {
               {showSidebar && (
                 <aside style={{ width: "172px", flexShrink: 0, position: "sticky", top: "24px", alignSelf: "flex-start", paddingRight: "20px", borderRight: `1px solid ${t.border}`, marginRight: "24px" }}>
                   <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Recipes</p>
-                  {CATEGORIES.map(cat => sidebarBtn(
-                    cat === "all" ? "All recipes" : cat,
-                    section === "recipes" && selectedCategory === cat,
-                    () => { setSelectedCategory(cat); setSelectedTagId(null); setSection("recipes"); }
+                  {CATEGORIES.map(cat => (
+                    <SidebarBtn key={cat}
+                      label={cat === "all" ? "All recipes" : cat}
+                      active={section === "recipes" && selectedCategory === cat}
+                      onClick={() => { setSelectedCategory(cat); setSelectedTagId(null); setSection("recipes"); }}
+                    />
                   ))}
                   <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
                     <p style={{ fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
-                    {sidebarBtn("Meal plans", section === "mealplans", () => { setSection("mealplans"); setSelected(null); setAdding(false); })}
+                    <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
                   </div>
                 </aside>
               )}
@@ -354,7 +373,7 @@ export default function App() {
 
                 {/* Meal plans list */}
                 {section === "mealplans" && (
-                  <MealPlanList plans={mealPlans} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} />
+                  <MealPlanList plans={mealPlans} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} onDelete={handleDeletePlan} onRename={handleRenamePlan} />
                 )}
               </main>
             </div>

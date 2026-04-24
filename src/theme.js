@@ -14,5 +14,5 @@ export const t = {
 };
 
 export const serif = "'EB Garamond', Georgia, 'Times New Roman', serif";
-export const sans = "'Outfit', 'Helvetica Neue', Arial, sans-serif";
+export const sans = "'Calibri Light', Calibri, 'Gill Sans MT', 'Trebuchet MS', sans-serif";
 export const body = "'Cormorant Garamond', Georgia, serif";

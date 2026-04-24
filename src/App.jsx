@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./lib/supabase";
 import { t, serif, sans } from "./theme";
 import RecipeCard from "./components/RecipeCard";
@@ -18,6 +18,17 @@ const DEFAULT_CONFIG = {
   title: "Oren's Cookbook",
   subtitle: "Collagen · Skin Health · Carnivore Protocol",
 };
+
+function useSessionState(key, def) {
+  const [state, setState] = useState(() => {
+    try { const v = sessionStorage.getItem(key); return v !== null ? JSON.parse(v) : def; } catch { return def; }
+  });
+  const set = useCallback((v) => {
+    setState(v);
+    try { sessionStorage.setItem(key, JSON.stringify(v)); } catch {}
+  }, [key]);
+  return [state, set];
+}
 
 function SidebarBtn({ label, active, onClick }) {
   const [hovered, setHovered] = useState(false);
@@ -80,20 +91,20 @@ function CauldronMark() {
 export default function App() {
   const [session, setSession] = useState(undefined);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
-  const [editingField, setEditingField] = useState(null);
-  const [configDraft, setConfigDraft] = useState({});
+  const [editingHeader, setEditingHeader] = useState(false);
+  const [headerDraft, setHeaderDraft] = useState({});
   const [recipes, setRecipes] = useState([]);
   const [tags, setTags] = useState([]);
   const [mealPlans, setMealPlans] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [ingredientCategories, setIngredientCategories] = useState([]);
   const [ingredientMappings, setIngredientMappings] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedTagId, setSelectedTagId] = useState(null);
-  const [selected, setSelected] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useSessionState("nav_cat", "all");
+  const [selectedTagId, setSelectedTagId] = useSessionState("nav_tag", null);
+  const [selected, setSelected] = useSessionState("nav_recipe", null);
   const [adding, setAdding] = useState(false);
-  const [section, setSection] = useState("recipes");
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [section, setSection] = useSessionState("nav_section", "recipes");
+  const [selectedPlan, setSelectedPlan] = useSessionState("nav_plan", null);
   const [search, setSearch] = useState("");
   const [userRole, setUserRole] = useState("editor");
   const [loading, setLoading] = useState(true);
@@ -152,9 +163,11 @@ export default function App() {
     await supabase.from("app_config").upsert({ key, value }, { onConflict: "key" });
   }
 
-  const startEdit = (field) => { setEditingField(field); setConfigDraft({ ...config }); };
-  const saveEdit  = (field) => { setEditingField(null); if (configDraft[field] !== config[field]) saveConfigField(field, configDraft[field]); };
-  const cancelEdit = () => setEditingField(null);
+  const openHeaderEdit = () => { setHeaderDraft({ ...config }); setEditingHeader(true); };
+  const saveHeaderEdit = () => {
+    ["overtitle", "title", "subtitle"].forEach(f => { if (headerDraft[f] !== config[f]) saveConfigField(f, headerDraft[f]); });
+    setEditingHeader(false);
+  };
 
   const filteredRecipes = recipes.filter(r => {
     const catOk = selectedCategory === "all" || r.category === selectedCategory;
@@ -303,25 +316,10 @@ export default function App() {
   const inIngredientsView  = section === "ingredients";
   const showSidebar        = !isMobile && (inListView || inPlanListView || inTagsView || inIngredientsView);
 
-  const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0",  background: "none", border: "none", outline: "none", padding: 0 };
-  const titleStyle = { fontSize: "clamp(22px, 4vw, 36px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em", background: "none", border: "none", outline: "none", padding: 0 };
-  const subStyle   = { fontSize: "11px", color: t.terra,  fontFamily: sans, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0,             background: "none", border: "none", outline: "none", padding: 0 };
-
-  const EditableText = ({ field, baseStyle, tag: Tag = "p" }) => {
-    if (editingField === field) {
-      return (
-        <input
-          value={configDraft[field]}
-          onChange={e => setConfigDraft(d => ({ ...d, [field]: e.target.value }))}
-          onBlur={() => saveEdit(field)}
-          onKeyDown={e => { if (e.key === "Enter") saveEdit(field); if (e.key === "Escape") cancelEdit(); }}
-          autoFocus
-          style={{ ...baseStyle, display: "block", borderBottom: "1px solid rgba(255,255,255,0.25)", width: "280px", boxSizing: "border-box" }}
-        />
-      );
-    }
-    return <Tag onClick={() => startEdit(field)} style={{ ...baseStyle, cursor: "text" }} title="Click to edit">{config[field]}</Tag>;
-  };
+  const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0" };
+  const titleStyle = { fontSize: "clamp(22px, 4vw, 36px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em" };
+  const subStyle   = { fontSize: "11px", color: t.terra,  fontFamily: sans, letterSpacing: "0.18em", textTransform: "uppercase", margin: 0 };
+  const inStyle    = (base) => ({ ...base, background: "none", border: "none", borderBottom: "1px solid rgba(255,255,255,0.25)", outline: "none", padding: "2px 0", display: "block", width: "280px", boxSizing: "border-box" });
 
   return (
     <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }}>
@@ -335,10 +333,30 @@ export default function App() {
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <CauldronMark />
                 <div>
-                  <EditableText field="overtitle" baseStyle={overStyle} tag="p" />
-                  <EditableText field="title" baseStyle={titleStyle} tag="h1" />
-                  <EditableText field="subtitle" baseStyle={subStyle} tag="p" />
+                  {editingHeader ? (
+                    <>
+                      <input value={headerDraft.overtitle || ""} onChange={e => setHeaderDraft(d => ({ ...d, overtitle: e.target.value }))} style={inStyle(overStyle)} />
+                      <input value={headerDraft.title || ""} onChange={e => setHeaderDraft(d => ({ ...d, title: e.target.value }))} style={inStyle(titleStyle)} />
+                      <input value={headerDraft.subtitle || ""} onChange={e => setHeaderDraft(d => ({ ...d, subtitle: e.target.value }))} style={inStyle(subStyle)} />
+                    </>
+                  ) : (
+                    <>
+                      <p style={overStyle}>{config.overtitle}</p>
+                      <h1 style={titleStyle}>{config.title}</h1>
+                      <p style={subStyle}>{config.subtitle}</p>
+                    </>
+                  )}
                 </div>
+                {isEditor && (
+                  editingHeader ? (
+                    <div style={{ display: "flex", gap: "6px", alignSelf: "flex-end", marginBottom: "2px" }}>
+                      <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>Save</button>
+                      <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer", alignSelf: "flex-start", marginTop: "6px" }}>✎ Edit</button>
+                  )
+                )}
               </div>
               {isEditor && (inListView || inPlanListView || inTagsView) && (
                 <div style={{ display: "flex", gap: "8px" }}>
@@ -377,7 +395,7 @@ export default function App() {
           )}
 
           {!loading && !error && section === "mealplans" && selectedPlan && selectedPlanData && (
-            <MealPlanDetail plan={selectedPlanData} recipes={recipes} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
+            <MealPlanDetail plan={selectedPlanData} recipes={recipes} ingredients={ingredients} ingredientCategories={ingredientCategories} ingredientMappings={ingredientMappings} tags={tags} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
           )}
 
           {!loading && !error && (inListView || inPlanListView || inTagsView || inIngredientsView) && (

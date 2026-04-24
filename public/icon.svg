@@ -1,12 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="100" fill="#2C2418"/>
-
-  <!-- Drop shadow -->
-  <rect x="76" y="48" width="384" height="440" rx="14" fill="#111" opacity="0.4"/>
-
   <!-- Page edges (right side stacked) -->
-  <rect x="442" y="40" width="14" height="434" rx="2" fill="#F0EBE3" opacity="0.85"/>
-  <rect x="446" y="42" width="10" height="430" rx="1" fill="#E0D8CC" opacity="0.6"/>
+  <rect x="442" y="40" width="14" height="434" rx="2" fill="#F0EBE3" opacity="0.9"/>
+  <rect x="446" y="42" width="10" height="430" rx="1" fill="#E0D8CC" opacity="0.65"/>
   <line x1="443" y1="110" x2="456" y2="110" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
   <line x1="443" y1="220" x2="456" y2="220" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
   <line x1="443" y1="330" x2="456" y2="330" stroke="#C8BEB2" stroke-width="1.5" opacity="0.5"/>
@@ -31,9 +26,9 @@
   <!-- Cover border frame (cream) -->
   <rect x="136" y="60" width="292" height="396" rx="7" fill="none" stroke="#F0EBE3" stroke-width="4" opacity="0.3"/>
   <!-- Inner border frame (sage) -->
-  <rect x="144" y="68" width="276" height="380" rx="5" fill="none" stroke="#6A9E82" stroke-width="2" opacity="0.22"/>
+  <rect x="144" y="68" width="276" height="380" rx="5" fill="none" stroke="#6A9E82" stroke-width="2" opacity="0.25"/>
 
-  <!-- Crossed utensils on cover (cream + sage) -->
+  <!-- Crossed utensils on cover -->
 
   <!-- Spatula (cream, behind) -->
   <g transform="translate(282,258) scale(0.52) rotate(38)">
@@ -43,7 +38,7 @@
     <rect x="-7"  y="-166" width="14" height="68" rx="5" fill="#C47A5A" opacity="0.55"/>
     <rect x="16"  y="-166" width="14" height="68" rx="5" fill="#C47A5A" opacity="0.55"/>
     <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#F0EBE3" opacity="0.9"/>
-    <rect x="-12" y="62"  width="24" height="52"  fill="#6A9E82" opacity="0.8"/>
+    <rect x="-12" y="62"  width="24" height="52"  fill="#6A9E82" opacity="0.85"/>
     <ellipse cx="0" cy="182" rx="14" ry="11" fill="#EDE6DC"/>
   </g>
 
@@ -52,7 +47,7 @@
     <ellipse cx="0" cy="-148" rx="58" ry="72" fill="#F0EBE3"/>
     <ellipse cx="8" cy="-158" rx="38" ry="47" fill="#EDE6DC" opacity="0.5"/>
     <rect x="-11" y="-76"  width="22" height="248" rx="11" fill="#F0EBE3"/>
-    <rect x="-11" y="62"   width="22" height="52"  fill="#6A9E82" opacity="0.75"/>
+    <rect x="-11" y="62"   width="22" height="52"  fill="#6A9E82" opacity="0.8"/>
     <ellipse cx="0" cy="174" rx="14" ry="11" fill="#EDE6DC"/>
   </g>
 

@@ -72,7 +72,7 @@ export default function TagManager({ tags, onCreate, onUpdate, onDelete }) {
       <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: `1px solid ${t.border}` }}>
         <p style={{ fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 12px 0" }}>New tag</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
-          {["#6A9E82","#C47A5A","#8B6FA6","#4A8FA8","#D4A847","#A85858","#5A8FA8","#7AB87A","#B87AB8","#D47A47","#4A7A8A","#8A7A50","#A8B87A","#7A8AB8","#B85A7A"].map(c => (
+          {["#6A9E82","#C47A5A","#8A7A68","#5C7A6A","#B8936A","#7A5A48","#9A8A70","#4A7A70","#C4A070","#6A5848","#8A9A7A","#A87060","#6A7A80","#9A7060","#5A6A58"].map(c => (
             <button key={c} onClick={() => setNewColor(c)} style={{
               width: "22px", height: "22px", borderRadius: "50%", background: c, border: `2px solid ${newColor === c ? t.ink : "transparent"}`,
               cursor: "pointer", padding: 0, flexShrink: 0, transition: "border-color 0.15s",

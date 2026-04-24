@@ -16,7 +16,13 @@ export default function IngredientCatalogue({
   const [showCatForm, setShowCatForm] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatIcon, setNewCatIcon] = useState("");
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpandedState] = useState(() => {
+    try { return sessionStorage.getItem("ingr_expanded") || null; } catch { return null; }
+  });
+  const setExpanded = (id) => {
+    setExpandedState(id);
+    try { id ? sessionStorage.setItem("ingr_expanded", id) : sessionStorage.removeItem("ingr_expanded"); } catch {}
+  };
 
   const getMapping = (id) => mappings.find(m => m.ingredient_id === id);
   const getCategory = (id) => categories.find(c => c.id === id);
@@ -111,25 +117,22 @@ export default function IngredientCatalogue({
         {isOpen && (
           <div style={{ padding: "12px 14px 14px", borderTop: `1px solid ${t.border}`, background: t.surface2, animation: "fadeSlideIn 0.15s ease" }}>
             <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "12px" }}>
-              <div>
-                <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>Default unit</span>
-                <div style={{ fontSize: "14px", fontFamily: sans, color: t.inkMid, marginTop: "2px" }}>{ing.default_unit || "g"}</div>
-              </div>
               {ing.nutrition_mode === "tracked" && mapping && (
                 <>
-                  <div>
-                    <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>USDA Source</span>
-                    <div style={{ fontSize: "13px", fontFamily: sans, color: t.inkMid, marginTop: "2px" }}>{mapping.description}</div>
-                    <div style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint }}>FDC #{mapping.fdc_id}</div>
-                  </div>
+                  {mapping.description && (
+                    <div>
+                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>USDA Source</span>
+                      <div style={{ fontSize: "13px", fontFamily: sans, color: t.inkMid, marginTop: "2px" }}>{mapping.description}</div>
+                    </div>
+                  )}
                   {Object.keys(mapping.nutrients || {}).length > 0 && (
                     <div>
-                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>per 100g</span>
-                      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
-                        {[["Cal", "calories", "kcal"], ["Pro", "protein", "g"], ["Fat", "totalFat", "g"], ["Carb", "totalCarb", "g"]].map(([lbl, key, unit]) =>
+                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>Per 100g</span>
+                      <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginTop: "6px" }}>
+                        {[["Calories", "calories", "kcal"], ["Protein", "protein", "g"], ["Fat", "totalFat", "g"], ["Carbs", "totalCarb", "g"]].map(([lbl, key, unit]) =>
                           mapping.nutrients[key] != null && (
                             <div key={key} style={{ textAlign: "center" }}>
-                              <div style={{ fontSize: "14px", fontFamily: serif, color: t.green }}>{mapping.nutrients[key]}<span style={{ fontSize: "10px", color: t.inkFaint }}>{unit}</span></div>
+                              <div style={{ fontSize: "16px", fontFamily: serif, color: t.green }}>{mapping.nutrients[key]}<span style={{ fontSize: "10px", color: t.inkFaint, marginLeft: "2px" }}>{unit}</span></div>
                               <div style={{ fontSize: "10px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em" }}>{lbl}</div>
                             </div>
                           )

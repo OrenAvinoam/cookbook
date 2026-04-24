@@ -4,7 +4,7 @@ import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 export default function AddItemModal({ recipes, ingredients, categories, mappings, tags, recipeCategories = [], onAdd, onClose }) {
-  const { tr, isRTL } = useLanguage();
+  const { tr, tcat, isRTL } = useLanguage();
   const [tab, setTab] = useState("recipes");
   const [recipeSearch, setRecipeSearch] = useState("");
   const [recipeCat, setRecipeCat] = useState("all");
@@ -114,7 +114,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "8px" }}>
                 <FilterChip active={recipeCat === "all"} onClick={() => setRecipeCat("all")} label={tr("modal_cat_all")} />
                 {recipeCategories.map(cat => (
-                  <FilterChip key={cat.id || cat.name} active={recipeCat === cat.name} onClick={() => setRecipeCat(cat.name)} label={cat.name} />
+                  <FilterChip key={cat.id || cat.name} active={recipeCat === cat.name} onClick={() => setRecipeCat(cat.name)} label={tcat(cat.name)} />
                 ))}
               </div>
 

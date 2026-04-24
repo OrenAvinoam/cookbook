@@ -41,7 +41,6 @@ function useSessionState(key, def) {
 function SidebarBtn({ label, active, onClick }) {
   const [hovered, setHovered] = useState(false);
   const { isRTL } = useLanguage();
-  const borderSide = isRTL ? "borderRight" : "borderLeft";
   return (
     <button
       onClick={onClick}
@@ -49,13 +48,13 @@ function SidebarBtn({ label, active, onClick }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         display: "block", width: "100%", textAlign: isRTL ? "right" : "left",
-        padding: "8px 12px 8px 9px",
+        padding: "8px 12px",
         borderRadius: "8px", border: "none",
-        [borderSide]: active ? `3px solid ${t.green}` : "3px solid transparent",
+        boxShadow: active ? (isRTL ? `inset -3px 0 0 ${t.green}` : `inset 3px 0 0 ${t.green}`) : "none",
         background: active ? t.ink : hovered ? t.green + "22" : "transparent",
         color: active ? "#fff" : hovered ? t.inkMid : t.inkLight,
         fontFamily: sans, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase",
-        cursor: "pointer", transition: "background 0.18s, color 0.18s", marginBottom: "2px",
+        cursor: "pointer", transition: "background 0.18s, color 0.18s, box-shadow 0.18s", marginBottom: "2px",
       }}
     >{label}</button>
   );
@@ -99,7 +98,7 @@ function CauldronMark() {
 }
 
 export default function App() {
-  const { tr, lang, setLang, isRTL } = useLanguage();
+  const { tr, tcat, lang, setLang, isRTL } = useLanguage();
   const [session, setSession] = useState(undefined);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [editingHeader, setEditingHeader] = useState(false);
@@ -381,8 +380,26 @@ export default function App() {
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
-        <div style={{ background: t.ink, padding: "20px 24px 18px", borderBottom: `3px solid ${t.terra}` }}>
+        <div style={{ background: t.ink, padding: "10px 24px 18px", borderBottom: `3px solid ${t.terra}` }}>
           <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+            {/* Top-left utility row: language toggle + header edit controls (always visible, always left) */}
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
+              <button
+                onClick={() => setLang(lang === "en" ? "he" : "en")}
+                style={{ background: "none", border: "1px solid rgba(255,255,255,0.22)", color: "rgba(255,255,255,0.65)", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "4px 12px", borderRadius: "20px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
+                title={lang === "en" ? "Switch to Hebrew" : "Switch to English"}
+              >{tr("lang_toggle")}</button>
+              {isEditor && (editingHeader ? (
+                <>
+                  <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_save")}</button>
+                  <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.22)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 10px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_cancel")}</button>
+                </>
+              ) : (
+                <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "4px 10px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_edit")}</button>
+              ))}
+            </div>
+
+            {/* Main header row */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }} dir={isRTL ? "rtl" : "ltr"}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <CauldronMark />
@@ -402,42 +419,21 @@ export default function App() {
                   )}
                 </div>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-                {isEditor && (
-                  <>
-                    {(inListView || inPlanListView || inTagsView || inCategoriesView) && (
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        {inListView && (
-                          <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                            {tr("btn_new_recipe")}
-                          </button>
-                        )}
-                        {inPlanListView && (
-                          <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                            {tr("btn_new_plan")}
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    {editingHeader ? (
-                      <div style={{ display: "flex", gap: "6px" }}>
-                        <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_save")}</button>
-                        <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_cancel")}</button>
-                      </div>
-                    ) : (
-                      <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_edit")}</button>
-                    )}
-                  </>
-                )}
-                {/* Language toggle — always visible */}
-                <button
-                  onClick={() => setLang(lang === "en" ? "he" : "en")}
-                  style={{ background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.6)", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 13px", borderRadius: "20px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
-                  title={lang === "en" ? "Switch to Hebrew" : "Switch to English"}
-                >
-                  {tr("lang_toggle")}
-                </button>
-              </div>
+              {/* Context-sensitive action buttons (New Recipe / New Plan) */}
+              {isEditor && (inListView || inPlanListView) && (
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {inListView && (
+                    <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                      {tr("btn_new_recipe")}
+                    </button>
+                  )}
+                  {inPlanListView && (
+                    <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                      {tr("btn_new_plan")}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -473,7 +469,7 @@ export default function App() {
                   <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>{tr("nav_recipes")}</p>
                   <SidebarBtn label={tr("nav_all")} active={section === "recipes" && selectedCategory === "all"} onClick={() => { setSelectedCategory("all"); setSelectedTagId(null); navTo("recipes"); }} />
                   {recipeCategories.map(cat => (
-                    <SidebarBtn key={cat.id} label={cat.name} active={section === "recipes" && selectedCategory === cat.name} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} />
+                    <SidebarBtn key={cat.id} label={tcat(cat.name)} active={section === "recipes" && selectedCategory === cat.name} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} />
                   ))}
                   {isEditor && (
                     <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
@@ -502,7 +498,7 @@ export default function App() {
                   <div style={{ display: "flex", gap: "4px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
                     <button onClick={() => { setSelectedCategory("all"); setSelectedTagId(null); navTo("recipes"); }} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "recipes" && selectedCategory === "all" ? t.ink : t.surface2, color: section === "recipes" && selectedCategory === "all" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", cursor: "pointer" }}>{tr("cat_all")}</button>
                     {recipeCategories.map(cat => (
-                      <button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "recipes" && selectedCategory === cat.name ? t.ink : t.surface2, color: section === "recipes" && selectedCategory === cat.name ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{cat.name}</button>
+                      <button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "recipes" && selectedCategory === cat.name ? t.ink : t.surface2, color: section === "recipes" && selectedCategory === cat.name ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tcat(cat.name)}</button>
                     ))}
                     {isEditor && <button onClick={() => navTo("mealplans")} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "mealplans" ? t.terra : t.surface2, color: section === "mealplans" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tr("nav_mealplans")}</button>}
                     {isEditor && <button onClick={() => navTo("tags")} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "tags" ? t.green : t.surface2, color: section === "tags" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tr("nav_tags")}</button>}

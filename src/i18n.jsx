@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 const strings = {
   en: {
@@ -6,6 +6,7 @@ const strings = {
     nav_catalogue: "Catalogue", nav_tags: "Tags", nav_categories: "Categories",
     nav_planning: "Planning", nav_manage: "Manage",
     cat_all: "All",
+    cat_breakfast: "Breakfast", cat_lunch: "Lunch", cat_dinner: "Dinner", cat_snack: "Snack", cat_dessert: "Dessert",
     btn_new_recipe: "+ New recipe", btn_new_plan: "+ New plan",
     btn_edit: "✎ Edit", btn_save: "Save", btn_cancel: "Cancel", btn_delete: "Delete",
     btn_add: "+ Add", btn_added: "✓ Added", btn_done: "Done", btn_create: "Create",
@@ -94,6 +95,7 @@ const strings = {
     nav_catalogue: "קטלוג", nav_tags: "תגיות", nav_categories: "קטגוריות",
     nav_planning: "תכנון", nav_manage: "ניהול",
     cat_all: "הכל",
+    cat_breakfast: "ארוחת בוקר", cat_lunch: "ארוחת צהריים", cat_dinner: "ארוחת ערב", cat_snack: "חטיף", cat_dessert: "קינוח",
     btn_new_recipe: "+ מתכון חדש", btn_new_plan: "+ תפריט חדש",
     btn_edit: "✎ עריכה", btn_save: "שמור", btn_cancel: "ביטול", btn_delete: "מחיקה",
     btn_add: "+ הוסף", btn_added: "✓ נוסף", btn_done: "סיום", btn_create: "צור",
@@ -194,9 +196,18 @@ export function LangProvider({ children }) {
     if (typeof val === "function") return val(...args);
     return val ?? key;
   }, [lang]);
+  // Translate known category names (e.g. "breakfast" → "ארוחת בוקר"); falls back to original string
+  const tcat = useCallback((name) => {
+    if (!name) return name;
+    const key = "cat_" + name.toLowerCase().replace(/\s+/g, "_");
+    const val = strings[lang]?.[key];
+    return val ?? name;
+  }, [lang]);
   const isRTL = lang === "he";
+  // Keep <html lang="…"> in sync — enables browser-level translate for user content (recipe text)
+  useEffect(() => { document.documentElement.lang = lang; }, [lang]);
   return (
-    <LangContext.Provider value={{ lang, setLang, tr, isRTL }}>
+    <LangContext.Provider value={{ lang, setLang, tr, tcat, isRTL }}>
       {children}
     </LangContext.Provider>
   );

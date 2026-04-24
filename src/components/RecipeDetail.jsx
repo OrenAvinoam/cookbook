@@ -46,6 +46,7 @@ function scaleAmount(str, factor) {
 function fmtN(n) { const r = Math.round(n * 100) / 100; return String(r); }
 
 function NutritionForm({ initial, onSave, onCancel }) {
+  const { tr } = useLanguage();
   const [vals, setVals] = useState(
     initial ? Object.fromEntries(NUTRITION_FIELDS.map((f) => [f.key, initial[f.key] ?? ""])) : emptyNutrition
   );
@@ -62,7 +63,7 @@ function NutritionForm({ initial, onSave, onCancel }) {
   return (
     <div>
       <p style={{ fontFamily: sans, fontSize: "13px", color: t.inkFaint, margin: "0 0 16px 0", lineHeight: 1.6 }}>
-        Enter per-serving values. Leave blank for any you don't have.
+        {tr("enter_nutrition")}
       </p>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px", marginBottom: "20px" }}>
         {NUTRITION_FIELDS.map((f) => (
@@ -81,11 +82,11 @@ function NutritionForm({ initial, onSave, onCancel }) {
       </div>
       <div style={{ display: "flex", gap: "8px" }}>
         <button onClick={handleSave} disabled={saving} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "8px 20px", borderRadius: "20px", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.7 : 1 }}>
-          {saving ? "Saving…" : "Save nutrition"}
+          {saving ? tr("btn_saving") : tr("save_nutrition")}
         </button>
         {onCancel && (
           <button onClick={onCancel} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "8px 16px", borderRadius: "20px", cursor: "pointer" }}>
-            Cancel
+            {tr("btn_cancel")}
           </button>
         )}
       </div>
@@ -116,7 +117,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
     .filter(Boolean);
 
   const accentColor = recipeTags[0]?.color || t.green;
-  const { tr } = useLanguage();
+  const { tr, tcat } = useLanguage();
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
 
   function toggleIngredient(i) {
@@ -187,7 +188,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
             {recipe.category && (
               <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
-                {recipe.category}
+                {tcat(recipe.category)}
               </span>
             )}
             {recipeTags.map((tag) => (

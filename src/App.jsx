@@ -42,34 +42,36 @@ function SidebarBtn({ label, active, onClick }) {
 
 function CauldronMark() {
   return (
-    <svg width="40" height="52" viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
+    <svg width="80" height="104" viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ display: "block", flexShrink: 0 }}>
       {/* Page edge right */}
       <rect x="38.5" y="3" width="1.5" height="46" rx="0.5" fill="#F0EBE3" opacity="0.75"/>
       {/* Spine */}
       <rect x="1" y="2" width="7" height="48" rx="3" fill="#8A4428"/>
-      <rect x="1.5" y="2" width="3" height="48" rx="2" fill="#C47A5A" opacity="0.28"/>
+      <rect x="1.5" y="2" width="3" height="48" rx="2" fill="#6A9E82" opacity="0.35"/>
       {/* Front cover */}
       <rect x="7" y="2" width="32" height="48" rx="3" fill="#C47A5A"/>
       {/* Cover top sheen */}
       <rect x="7" y="2" width="32" height="10" rx="3" fill="#D4896A" opacity="0.32"/>
+      {/* Sage tint strip at bottom of cover */}
+      <rect x="7" y="42" width="32" height="8" rx="3" fill="#6A9E82" opacity="0.22"/>
       {/* Binding groove */}
       <rect x="8.5" y="2" width="1" height="48" fill="#A05030" opacity="0.45"/>
-      {/* Cover border frame */}
-      <rect x="10.5" y="5" width="26" height="42" rx="2" fill="none" stroke="#F0EBE3" strokeWidth="0.6" opacity="0.35"/>
-      {/* Spine ribs */}
-      <rect x="2" y="11" width="5" height="1.5" rx="0.5" fill="#A85840" opacity="0.6"/>
-      <rect x="2" y="40" width="5" height="1.5" rx="0.5" fill="#A85840" opacity="0.6"/>
+      {/* Cover border frame — sage */}
+      <rect x="10.5" y="5" width="26" height="42" rx="2" fill="none" stroke="#6A9E82" strokeWidth="0.8" opacity="0.7"/>
+      {/* Spine ribs — sage accent */}
+      <rect x="2" y="11" width="5" height="1.5" rx="0.5" fill="#6A9E82" opacity="0.8"/>
+      <rect x="2" y="40" width="5" height="1.5" rx="0.5" fill="#6A9E82" opacity="0.8"/>
       {/* Spatula on cover (cream, behind) */}
       <g transform="translate(23,26) scale(0.068) rotate(38)">
         <path d="M-44,-188 L44,-188 L44,-82 L12,-60 L12,-48 L-12,-48 L-12,-60 L-44,-82 Z" fill="#F0EBE3" opacity="0.88"/>
         <rect x="-12" y="-48" width="24" height="228" rx="12" fill="#F0EBE3" opacity="0.88"/>
-        <rect x="-12" y="62" width="24" height="52" fill="#6A9E82" opacity="0.8"/>
+        <rect x="-12" y="62" width="24" height="52" fill="#6A9E82"/>
       </g>
       {/* Spoon on cover (cream, in front) */}
       <g transform="translate(23,26) scale(0.068) rotate(-38)">
         <ellipse cx="0" cy="-148" rx="58" ry="72" fill="#F0EBE3"/>
         <rect x="-11" y="-76" width="22" height="248" rx="11" fill="#F0EBE3"/>
-        <rect x="-11" y="62" width="22" height="52" fill="#6A9E82" opacity="0.75"/>
+        <rect x="-11" y="62" width="22" height="52" fill="#6A9E82"/>
       </g>
     </svg>
   );

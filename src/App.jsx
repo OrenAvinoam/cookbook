@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "./lib/supabase";
 import { t, serif, sans } from "./theme";
 import RecipeCard from "./components/RecipeCard";
@@ -109,6 +109,7 @@ export default function App() {
   const [userRole, setUserRole] = useState("editor");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const hasLoadedRef = useRef(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 680);
 
   useEffect(() => {
@@ -126,7 +127,7 @@ export default function App() {
   useEffect(() => { if (session) fetchAll(); }, [session]);
 
   async function fetchAll() {
-    setLoading(true);
+    if (!hasLoadedRef.current) setLoading(true);
     const [{ data: recipesData, error: rErr }, { data: tagsData, error: tErr }] = await Promise.all([
       supabase.from("recipes").select("*").order("created_at", { ascending: true }),
       supabase.from("tags").select("*").order("name"),
@@ -155,6 +156,7 @@ export default function App() {
     if (catData) setIngredientCategories(catData);
     if (mapData) setIngredientMappings(mapData);
 
+    hasLoadedRef.current = true;
     setLoading(false);
   }
 
@@ -347,28 +349,30 @@ export default function App() {
                     </>
                   )}
                 </div>
-                {isEditor && (
-                  editingHeader ? (
-                    <div style={{ display: "flex", gap: "6px", alignSelf: "flex-end", marginBottom: "2px" }}>
+              </div>
+              {isEditor && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                  {(inListView || inPlanListView || inTagsView) && (
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      {inListView && (
+                        <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                          + New recipe
+                        </button>
+                      )}
+                      {inPlanListView && (
+                        <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                          + New plan
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {editingHeader ? (
+                    <div style={{ display: "flex", gap: "6px" }}>
                       <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>Save</button>
                       <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }}>Cancel</button>
                     </div>
                   ) : (
-                    <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer", alignSelf: "flex-start", marginTop: "6px" }}>✎ Edit</button>
-                  )
-                )}
-              </div>
-              {isEditor && (inListView || inPlanListView || inTagsView) && (
-                <div style={{ display: "flex", gap: "8px" }}>
-                  {inListView && (
-                    <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                      + New recipe
-                    </button>
-                  )}
-                  {inPlanListView && (
-                    <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                      + New plan
-                    </button>
+                    <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer" }}>✎ Edit</button>
                   )}
                 </div>
               )}

@@ -60,18 +60,21 @@ export default function MealPlanList({ plans, onCreate, onOpen, onDelete, onRena
                   style={{ fontFamily: serif, fontSize: "18px", color: t.ink, background: "transparent", border: "none", borderBottom: `1px solid ${t.border}`, outline: "none", width: "100%", padding: "2px 0" }}
                 />
               ) : (
-                <p
-                  onClick={e => startRename(e, plan)}
-                  style={{ fontFamily: serif, fontSize: "18px", color: t.ink, margin: "0 0 4px 0", cursor: "text" }}
-                  title="Click to rename"
-                >{plan.name}</p>
+                <p style={{ fontFamily: serif, fontSize: "18px", color: t.ink, margin: "0 0 4px 0" }}>{plan.name}</p>
               )}
               <p style={{ fontFamily: sans, fontSize: "11px", color: t.inkFaint, margin: 0, letterSpacing: "0.08em" }}>
                 {uniqueCount} {uniqueCount === 1 ? "recipe" : "recipes"} · {totalSlots} {totalSlots === 1 ? "serving" : "servings"} planned
               </p>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
               {!isEditing && <span style={{ color: t.green, fontFamily: sans, fontSize: "12px" }}>Open →</span>}
+              {!isEditing && (
+                <button
+                  onClick={e => startRename(e, plan)}
+                  style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em", padding: "5px 11px", borderRadius: "20px", cursor: "pointer" }}
+                  title="Rename plan"
+                >✎ Edit</button>
+              )}
               <button
                 onClick={e => handleDelete(e, plan.id)}
                 style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, borderRadius: "6px", width: "28px", height: "28px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: "16px", flexShrink: 0 }}

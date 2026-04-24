@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
+import { useLanguage } from "../i18n";
 import IngredientList from "./IngredientList";
 import StepList from "./StepList";
 import NoteList from "./NoteList";
@@ -92,7 +93,7 @@ function NutritionForm({ initial, onSave, onCancel }) {
   );
 }
 
-export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, onDelete }) {
+export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEditor, onBack, onSave, onDelete }) {
   const [tab, setTab] = useState("ingredients");
   const [editing, setEditing] = useState(false);
   const [editingNutrition, setEditingNutrition] = useState(false);
@@ -115,6 +116,7 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
     .filter(Boolean);
 
   const accentColor = recipeTags[0]?.color || t.green;
+  const { tr } = useLanguage();
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
 
   function toggleIngredient(i) {
@@ -143,6 +145,7 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
       <RecipeForm
         initial={recipe}
         tags={tags}
+        recipeCategories={recipeCategories}
         onCancel={() => setEditing(false)}
         onSave={async (data) => { await onSave(data); setEditing(false); }}
       />
@@ -157,23 +160,23 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "8px" }}>
         <button onClick={onBack} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-          ← All recipes
+          {tr("btn_back_recipes")}
         </button>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <button onClick={() => setPrinting(true)} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-            Print / PDF
+            {tr("btn_print")}
           </button>
           <button onClick={() => { setCookMode(m => !m); setCheckedIngredients(new Set()); setCheckedSteps(new Set()); }} style={{ background: cookMode ? accentColor : "transparent", border: `1px solid ${cookMode ? accentColor : t.border}`, color: cookMode ? "#fff" : t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-            {cookMode ? "Exit cook mode" : "Cook mode"}
+            {cookMode ? tr("btn_exit_cook") : tr("btn_cook_mode")}
           </button>
           {isEditor && (
             <button onClick={() => setEditing(true)} style={{ background: "transparent", border: `1px solid ${accentColor}`, color: accentColor, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-              Edit
+              {tr("btn_edit")}
             </button>
           )}
           {isEditor && (
-            <button onClick={() => { if (confirm("Delete this recipe?")) onDelete(recipe.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
-              Delete
+            <button onClick={() => { if (confirm(tr("confirm_delete_recipe"))) onDelete(recipe.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>
+              {tr("btn_delete")}
             </button>
           )}
         </div>
@@ -208,13 +211,13 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
 
         <div style={{ display: "flex", flexWrap: "wrap", borderTop: `1px solid ${t.border}`, paddingTop: "16px", alignItems: "center", gap: "0" }}>
           {[
-            { l: "Prep", v: recipe.prep_time },
-            { l: "Cook", v: recipe.cook_time },
-            { l: "Total", v: recipe.total_time },
-            { l: "Daily dose", v: recipe.dose },
+            { l: tr("lbl_prep"), v: recipe.prep_time },
+            { l: tr("lbl_cook"), v: recipe.cook_time },
+            { l: tr("lbl_total"), v: recipe.total_time },
+            { l: tr("lbl_dose"), v: recipe.dose },
           ].filter((s) => s.v).map((s, i, arr) => (
             <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : `1px solid ${t.border}`, minWidth: "80px" }}>
-              <div style={{ fontSize: "14px", color: t.ink, fontFamily: serif }}>{s.v}</div>
+              <div style={{ fontSize: "14px", color: t.ink, fontFamily: body }}>{s.v}</div>
               <div style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
             </div>
           ))}
@@ -223,11 +226,11 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
             <div style={{ flex: "1 1 auto", padding: "10px 16px", minWidth: "100px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <button onClick={() => setServingsCount(c => Math.max(0.5, c - (c <= 1 ? 0.5 : 1)))} style={{ width: "22px", height: "22px", borderRadius: "50%", border: `1px solid ${t.border}`, background: t.surface2, color: t.inkMid, fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, lineHeight: 1 }}>−</button>
-                <span style={{ fontSize: "14px", color: scaleFactor !== 1 ? accentColor : t.ink, fontFamily: serif, minWidth: "24px", textAlign: "center" }}>{servingsCount}</span>
+                <span style={{ fontSize: "14px", color: scaleFactor !== 1 ? accentColor : t.ink, fontFamily: body, minWidth: "24px", textAlign: "center" }}>{servingsCount}</span>
                 <button onClick={() => setServingsCount(c => c + 1)} style={{ width: "22px", height: "22px", borderRadius: "50%", border: `1px solid ${t.border}`, background: t.surface2, color: t.inkMid, fontSize: "14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, lineHeight: 1 }}>+</button>
               </div>
               <div style={{ fontSize: "10px", color: scaleFactor !== 1 ? accentColor : t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>
-                Servings{scaleFactor !== 1 ? ` · ×${Math.round(scaleFactor * 100) / 100}` : ""}
+                {tr("lbl_servings")}{scaleFactor !== 1 ? ` · ×${Math.round(scaleFactor * 100) / 100}` : ""}
               </div>
             </div>
           )}
@@ -243,7 +246,7 @@ export default function RecipeDetail({ recipe, tags, isEditor, onBack, onSave, o
             cursor: "pointer", fontSize: "11px", letterSpacing: "0.14em",
             textTransform: "uppercase", fontFamily: sans, transition: "color 0.2s",
           }}>
-            {tb}
+            {tr(`tab_${tb}`)}
           </button>
         ))}
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
 import AddItemModal from "./AddItemModal";
+import { useLanguage } from "../i18n";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
@@ -84,8 +85,9 @@ function normalizeDayItems(arr) {
 
 export default function MealPlanDetail({
   plan, recipes, ingredients = [], ingredientCategories = [], ingredientMappings = [],
-  tags = [], onBack, onSave, onDelete,
+  tags = [], recipeCategories = [], onBack, onSave, onDelete,
 }) {
+  const { tr } = useLanguage();
   const normalize = (raw) => Object.fromEntries(DAYS.map(d => [d, normalizeDayItems((raw || {})[d])]));
 
   const [localDays, setLocalDays] = useState(() => normalize(plan.days));
@@ -166,17 +168,18 @@ export default function MealPlanDetail({
           categories={ingredientCategories}
           mappings={ingredientMappings}
           tags={tags}
+          recipeCategories={recipeCategories}
           onAdd={(type, id) => addItem(addingToDay, type, id)}
           onClose={() => setAddingToDay(null)}
         />
       )}
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "28px", flexWrap: "wrap", gap: "8px" }}>
-        <button onClick={onBack} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>← All plans</button>
+        <button onClick={onBack} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_back_plans")}</button>
         <div style={{ display: "flex", gap: "8px" }}>
-          <button onClick={() => { if (confirm("Delete this plan?")) onDelete(plan.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>Delete</button>
+          <button onClick={() => { if (confirm(tr("mp_confirm_del_plan"))) onDelete(plan.id); }} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_delete")}</button>
           <button onClick={handleSave} disabled={saving} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: sans, padding: "8px 20px", borderRadius: "20px", cursor: saving ? "wait" : "pointer", opacity: saving ? 0.7 : 1 }}>
-            {saving ? "Saving…" : "Save plan"}
+            {saving ? tr("btn_saving") : tr("btn_save_plan")}
           </button>
         </div>
       </div>
@@ -194,17 +197,17 @@ export default function MealPlanDetail({
           <h2 style={{ fontFamily: serif, fontSize: "28px", fontWeight: "400", color: t.ink, margin: 0, flex: 1 }}>{name}</h2>
         )}
         {!isEditingName && (
-          <button onClick={() => setIsEditingName(true)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, cursor: "pointer", padding: "4px 10px", borderRadius: "6px", fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em", flexShrink: 0 }}>✎ Edit</button>
+          <button onClick={() => setIsEditingName(true)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, cursor: "pointer", padding: "4px 10px", borderRadius: "6px", fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em", flexShrink: 0 }}>{tr("btn_edit")}</button>
         )}
       </div>
 
-      {sectionHdr("Week")}
+      {sectionHdr(tr("section_week"))}
 
       <div style={{ overflowX: "auto" }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "8px", minWidth: "840px" }}>
           {DAYS.map(day => (
             <div key={day} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "8px", padding: "10px 8px 8px", display: "flex", flexDirection: "column", gap: "4px" }}>
-              <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 0", paddingBottom: "6px", borderBottom: `1px solid ${t.surface2}`, textAlign: "center" }}>{day.slice(0, 3)}</p>
+              <p style={{ fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 0", paddingBottom: "6px", borderBottom: `1px solid ${t.surface2}`, textAlign: "center" }}>{tr(`day_${day}`)}</p>
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
                 {localDays[day].map((item, idx) => {
                   const noteKey = `${day}-${idx}`;
@@ -250,7 +253,7 @@ export default function MealPlanDetail({
                   );
                 })}
               </div>
-              <button onClick={() => setAddingToDay(day)} style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "10px", letterSpacing: "0.06em", padding: "5px 4px", borderRadius: "5px", cursor: "pointer" }}>+ Add</button>
+              <button onClick={() => setAddingToDay(day)} style={{ width: "100%", background: "none", border: `1px dashed ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "10px", letterSpacing: "0.06em", padding: "5px 4px", borderRadius: "5px", cursor: "pointer" }}>{tr("mp_day_add")}</button>
             </div>
           ))}
         </div>
@@ -259,7 +262,7 @@ export default function MealPlanDetail({
       {/* Nutrition */}
       {hasNutrition && (
         <>
-          {sectionHdr("Nutrition — Daily Average (total ÷ 7)")}
+          {sectionHdr(tr("section_nutrition_avg"))}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
             {NUTRITION_FIELDS.filter(f => dailyAvg[f.key] != null).map(f => (
               <div key={f.key} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "8px", padding: "12px 18px", minWidth: "90px" }}>
@@ -274,9 +277,9 @@ export default function MealPlanDetail({
       {/* Shopping list */}
       {shoppingList.length > 0 && (
         <>
-          {sectionHdr(`Shopping List (${shoppingList.length} items)`,
+          {sectionHdr(tr("shopping_items", shoppingList.length),
             <button onClick={copyShoppingList} style={{ background: copied ? t.green : "transparent", border: `1px solid ${copied ? t.green : t.border}`, color: copied ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "5px 14px", borderRadius: "20px", cursor: "pointer", transition: "all 0.2s" }}>
-              {copied ? "Copied!" : "Copy list"}
+              {copied ? tr("btn_copied") : tr("btn_copy")}
             </button>
           )}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "6px" }}>

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { t, serif, sans } from "../theme";
+import { useLanguage } from "../i18n";
 
 export default function LoginPage() {
+  const { tr } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,11 +38,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} style={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: "12px", padding: "28px" }}>
           <div style={{ marginBottom: "14px" }}>
-            <label style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "4px" }}>Email</label>
+            <label style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "4px" }}>{tr("login_email")}</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" style={inputStyle} />
           </div>
           <div style={{ marginBottom: "20px" }}>
-            <label style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "4px" }}>Password</label>
+            <label style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, display: "block", marginBottom: "4px" }}>{tr("login_password")}</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" style={inputStyle} />
           </div>
           {error && <p style={{ fontFamily: sans, fontSize: "12px", color: "#8B3A3A", margin: "0 0 14px 0" }}>{error}</p>}
@@ -49,7 +51,7 @@ export default function LoginPage() {
             disabled={loading}
             style={{ width: "100%", background: t.ink, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "10px", borderRadius: "20px", cursor: loading ? "wait" : "pointer", opacity: loading ? 0.7 : 1 }}
           >
-            {loading ? "Signing in…" : "Sign in"}
+            {loading ? tr("btn_signing_in") : tr("btn_sign_in")}
           </button>
         </form>
       </div>

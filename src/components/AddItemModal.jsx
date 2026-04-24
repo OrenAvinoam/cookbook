@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { t, serif, sans } from "../theme";
+import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
-const RECIPE_CATS = ["all", "breakfast", "lunch", "dinner", "snack", "dessert"];
-
-export default function AddItemModal({ recipes, ingredients, categories, mappings, tags, onAdd, onClose }) {
+export default function AddItemModal({ recipes, ingredients, categories, mappings, tags, recipeCategories = [], onAdd, onClose }) {
+  const { tr, isRTL } = useLanguage();
   const [tab, setTab] = useState("recipes");
   const [recipeSearch, setRecipeSearch] = useState("");
   const [recipeCat, setRecipeCat] = useState("all");
@@ -17,7 +17,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
   const getCat = (id) => categories.find(c => c.id === id);
 
   const filteredRecipes = recipes.filter(r => {
-    const catOk = recipeCat === "all" || r.category === recipeCat;
+    const catOk = recipeCat === "all" || r.category === recipeCat;  // recipeCat is now a name string
     const tagOk = !recipeTagId || (r.tag_ids || []).includes(recipeTagId);
     const q = recipeSearch.trim().toLowerCase();
     return catOk && tagOk && (!q || r.title?.toLowerCase().includes(q) || r.description?.toLowerCase().includes(q));
@@ -66,7 +66,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
         fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em",
         padding: "5px 14px", borderRadius: "20px", cursor: "pointer",
         transition: "all 0.2s", flexShrink: 0, minWidth: "72px",
-      }}>{added ? "✓ Added" : "+ Add"}</button>
+      }}>{added ? tr("btn_added") : tr("btn_add")}</button>
     );
   };
 
@@ -86,14 +86,14 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px 0" }}>
-          <h3 style={{ fontFamily: serif, fontSize: "20px", fontWeight: "400", color: t.ink, margin: 0 }}>Add to day</h3>
+          <h3 style={{ fontFamily: serif, fontSize: "20px", fontWeight: "400", color: t.ink, margin: 0 }}>{tr("modal_title")}</h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontSize: "22px", lineHeight: 1, padding: "2px 6px" }}>×</button>
         </div>
 
         {/* Tabs */}
         <div style={{ display: "flex", borderBottom: `1px solid ${t.border}`, marginTop: "12px" }}>
-          <TabBtn id="recipes" label="Recipes" />
-          <TabBtn id="ingredients" label="Ingredients" />
+          <TabBtn id="recipes" label={tr("modal_tab_recipes")} />
+          <TabBtn id="ingredients" label={tr("modal_tab_ingr")} />
         </div>
 
         {/* Scrollable body */}
@@ -106,21 +106,22 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
               <div style={{ position: "relative", marginBottom: "10px" }}>
                 <span style={{ position: "absolute", left: "11px", top: "50%", transform: "translateY(-50%)", color: t.inkFaint, pointerEvents: "none", fontSize: "13px" }}>🔍</span>
                 <input type="text" value={recipeSearch} onChange={e => setRecipeSearch(e.target.value)}
-                  placeholder="Search recipes…"
+                  placeholder={tr("modal_search_recipes")}
                   style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px 8px 32px", outline: "none", boxSizing: "border-box" }} />
               </div>
 
               {/* Category chips */}
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "8px" }}>
-                {RECIPE_CATS.map(cat => (
-                  <FilterChip key={cat} active={recipeCat === cat} onClick={() => setRecipeCat(cat)} label={cat === "all" ? "All" : cat} />
+                <FilterChip active={recipeCat === "all"} onClick={() => setRecipeCat("all")} label={tr("modal_cat_all")} />
+                {recipeCategories.map(cat => (
+                  <FilterChip key={cat.id || cat.name} active={recipeCat === cat.name} onClick={() => setRecipeCat(cat.name)} label={cat.name} />
                 ))}
               </div>
 
               {/* Tag chips */}
               {tags.length > 0 && (
                 <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "12px", alignItems: "center" }}>
-                  <span style={{ fontSize: "10px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>Tags:</span>
+                  <span style={{ fontSize: "10px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>{tr("modal_tags_lbl")}</span>
                   {tags.map(tag => {
                     const active = recipeTagId === tag.id;
                     return (
@@ -131,7 +132,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
                       }}>{tag.name}</button>
                     );
                   })}
-                  {recipeTagId && <button onClick={() => setRecipeTagId(null)} style={{ background: "none", border: "none", color: t.inkFaint, fontFamily: sans, fontSize: "10px", cursor: "pointer" }}>× clear</button>}
+                  {recipeTagId && <button onClick={() => setRecipeTagId(null)} style={{ background: "none", border: "none", color: t.inkFaint, fontFamily: sans, fontSize: "10px", cursor: "pointer" }}>{tr("modal_clear")}</button>}
                 </div>
               )}
 
@@ -158,7 +159,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
                   );
                 })}
                 {filteredRecipes.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>No recipes found.</div>
+                  <div style={{ textAlign: "center", padding: "40px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>{tr("modal_no_recipes")}</div>
                 )}
               </div>
             </div>
@@ -171,13 +172,13 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
               <div style={{ position: "relative", marginBottom: "10px" }}>
                 <span style={{ position: "absolute", left: "11px", top: "50%", transform: "translateY(-50%)", color: t.inkFaint, pointerEvents: "none", fontSize: "13px" }}>🔍</span>
                 <input type="text" value={ingrSearch} onChange={e => setIngrSearch(e.target.value)}
-                  placeholder="Search ingredients…"
+                  placeholder={tr("modal_search_ingr")}
                   style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px 8px 32px", outline: "none", boxSizing: "border-box" }} />
               </div>
 
               {/* Category chips */}
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "12px" }}>
-                <FilterChip active={ingrCat === "all"} onClick={() => setIngrCat("all")} label="All" />
+                <FilterChip active={ingrCat === "all"} onClick={() => setIngrCat("all")} label={tr("modal_cat_all")} />
                 {categories.map(cat => (
                   <FilterChip key={cat.id} active={ingrCat === cat.id} onClick={() => setIngrCat(cat.id)} label={`${cat.icon ? cat.icon + " " : ""}${cat.name}`} />
                 ))}
@@ -203,7 +204,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
                 })}
                 {filteredIngredients.length === 0 && (
                   <div style={{ textAlign: "center", padding: "40px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>
-                    {ingredients.length === 0 ? "No ingredients in catalogue yet." : "No ingredients found."}
+                    {ingredients.length === 0 ? tr("modal_no_ingr_yet") : tr("modal_no_ingr")}
                   </div>
                 )}
               </div>
@@ -213,7 +214,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
 
         {/* Footer */}
         <div style={{ padding: "12px 20px", borderTop: `1px solid ${t.border}`, display: "flex", justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "9px 26px", borderRadius: "20px", cursor: "pointer" }}>Done</button>
+          <button onClick={onClose} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", padding: "9px 26px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_done")}</button>
         </div>
       </div>
     </div>

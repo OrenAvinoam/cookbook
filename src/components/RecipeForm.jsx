@@ -5,7 +5,6 @@ import EmojiPicker from "./EmojiPicker";
 import TimeInput from "./TimeInput";
 import ImagePicker from "./ImagePicker";
 
-const CATEGORIES = ["breakfast", "lunch", "dinner", "snack", "dessert"];
 const PRESET_UNITS = ["g", "kg", "ml", "L", "tbsp", "tsp", "cup", "oz", "lb", "pcs", "pinch", "sprig", "clove", "slice", "bunch"];
 const UNIT_ALIASES = { litres: "L", litre: "L", liter: "L", liters: "L", grams: "g", gram: "g", sprigs: "sprig", cloves: "clove" };
 
@@ -62,7 +61,7 @@ function TextInput({ value, onChange, onBlur, placeholder, multiline, style: ext
   return <input type="text" value={value} onChange={(e) => onChange(e.target.value)} onBlur={onBlur} placeholder={placeholder} style={s} />;
 }
 
-export default function RecipeForm({ initial, tags, onSave, onCancel }) {
+export default function RecipeForm({ initial, tags, recipeCategories = [], onSave, onCancel }) {
   const initForm = initial
     ? {
         ...initial,
@@ -167,13 +166,13 @@ export default function RecipeForm({ initial, tags, onSave, onCancel }) {
 
         {sectionHeader("Category")}
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
-          {CATEGORIES.map((cat) => (
-            <button key={cat} type="button" onClick={() => set("category", cat)} style={{
+          {recipeCategories.map((cat) => (
+            <button key={cat.id || cat.name} type="button" onClick={() => set("category", cat.name)} style={{
               padding: "6px 16px", borderRadius: "20px", border: `1px solid ${form.category === cat ? t.ink : t.border}`,
-              background: form.category === cat ? t.ink : "transparent",
-              color: form.category === cat ? "#fff" : t.inkLight,
+              background: form.category === cat.name ? t.ink : "transparent",
+              color: form.category === cat.name ? "#fff" : t.inkLight,
               fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase", cursor: "pointer",
-            }}>{cat}</button>
+            }}>{cat.name}</button>
           ))}
         </div>
 

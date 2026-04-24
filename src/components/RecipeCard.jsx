@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
+import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
 export default function RecipeCard({ recipe, tags, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const { tr, isRTL } = useLanguage();
 
   const recipeTags = (recipe.tag_ids || [])
     .map((id) => tags.find((tg) => tg.id === id))
@@ -20,7 +22,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
       style={{
         background: t.surface,
         border: `1px solid ${hovered ? accentColor + "60" : t.border}`,
-        borderLeft: `3px solid ${hovered ? accentColor : accentColor + "70"}`,
+        [isRTL ? "borderRight" : "borderLeft"]: `3px solid ${hovered ? accentColor : accentColor + "70"}`,
         borderRadius: "12px", padding: "22px 26px", cursor: "pointer",
         transition: "all 0.25s",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
@@ -42,11 +44,11 @@ export default function RecipeCard({ recipe, tags, onClick }) {
           ))}
         </div>
         <div style={{ display: "flex", gap: "16px", flexShrink: 0, background: accentColor + "10", borderRadius: "8px", padding: "6px 12px" }}>
-          {[{ l: "Prep", v: recipe.prep_time }, { l: "Cook", v: recipe.cook_time }, { l: "Serves", v: recipe.servings }]
+          {[{ l: tr("lbl_prep"), v: recipe.prep_time }, { l: tr("lbl_cook"), v: recipe.cook_time }, { l: tr("lbl_servings"), v: recipe.servings }]
             .filter(s => s.v)
             .map((s, i) => (
             <div key={i} style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "13px", color: t.inkMid, fontFamily: serif }}>{s.v}</div>
+              <div style={{ fontSize: "13px", color: t.inkMid, fontFamily: body }}>{s.v}</div>
               <div style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.12em", textTransform: "uppercase" }}>{s.l}</div>
             </div>
           ))}
@@ -77,8 +79,8 @@ export default function RecipeCard({ recipe, tags, onClick }) {
 
       {/* Footer */}
       <p style={{ fontSize: "12px", color: t.inkFaint, fontFamily: sans, margin: 0 }}>
-        {recipe.ingredients?.length ?? 0} ingredients · {recipe.steps?.length ?? 0} steps
-        <span style={{ color: accentColor, marginLeft: "8px" }}>View recipe →</span>
+        {tr("lbl_x_ingr_steps", recipe.ingredients?.length ?? 0, recipe.steps?.length ?? 0)}
+        <span style={{ color: accentColor, marginLeft: "8px" }}>{tr("lbl_view_recipe")}</span>
       </p>
     </div>
   );

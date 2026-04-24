@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { t, serif, sans, body } from "../theme";
+import { useLanguage } from "../i18n";
 
 function parseTimeToSeconds(str) {
   if (!str || str === "—") return null;
@@ -19,6 +20,7 @@ function formatCountdown(seconds) {
 }
 
 export default function StepList({ steps, accentColor, cookMode, checkedSteps, onToggleStep }) {
+  const { tr } = useLanguage();
   const [open, setOpen] = useState(null);
   const [timers, setTimers] = useState({});
   const intervalRef = useRef(null);
@@ -121,21 +123,21 @@ export default function StepList({ steps, accentColor, cookMode, checkedSteps, o
                     </span>
                     {(!timer || !timer.running) && (
                       <button onClick={() => startTimer(i, totalSecs)} style={{ background: accentColor, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 14px", borderRadius: "20px", cursor: "pointer" }}>
-                        {timer?.remaining != null && timer.remaining < totalSecs ? "Resume" : "Start"}
+                        {timer?.remaining != null && timer.remaining < totalSecs ? tr("btn_resume") : tr("btn_start")}
                       </button>
                     )}
                     {timer?.running && (
                       <button onClick={() => pauseTimer(i)} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 14px", borderRadius: "20px", cursor: "pointer" }}>
-                        Pause
+                        {tr("btn_pause")}
                       </button>
                     )}
                     {timer && (
                       <button onClick={() => resetTimer(i, totalSecs)} style={{ background: "none", border: "none", color: t.inkFaint, fontFamily: sans, fontSize: "11px", cursor: "pointer", padding: "5px 8px" }}>
-                        Reset
+                        {tr("btn_reset")}
                       </button>
                     )}
                     {timer?.remaining === 0 && (
-                      <span style={{ fontFamily: sans, fontSize: "11px", color: accentColor, letterSpacing: "0.1em" }}>Done!</span>
+                      <span style={{ fontFamily: sans, fontSize: "11px", color: accentColor, letterSpacing: "0.1em" }}>{tr("lbl_timer_done")}</span>
                     )}
                   </div>
                 )}

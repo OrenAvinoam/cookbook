@@ -5,14 +5,22 @@ import RecipeCard from "./components/RecipeCard";
 import RecipeDetail from "./components/RecipeDetail";
 import RecipeForm from "./components/RecipeForm";
 import TagManager from "./components/TagManager";
+import RecipeCategoryManager from "./components/RecipeCategoryManager";
 import LoginPage from "./components/LoginPage";
 import MealPlanList from "./components/MealPlanList";
 import MealPlanDetail from "./components/MealPlanDetail";
 import IngredientCatalogue from "./components/IngredientCatalogue";
+import { useLanguage } from "./i18n";
 import "./App.css";
 
-const CATEGORIES = ["all", "breakfast", "lunch", "dinner", "snack", "dessert"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DEFAULT_RECIPE_CATEGORIES = [
+  { id: "breakfast", name: "breakfast", sort_order: 0 },
+  { id: "lunch",     name: "lunch",     sort_order: 1 },
+  { id: "dinner",    name: "dinner",    sort_order: 2 },
+  { id: "snack",     name: "snack",     sort_order: 3 },
+  { id: "dessert",   name: "dessert",   sort_order: 4 },
+];
 const DEFAULT_CONFIG = {
   overtitle: "a personal collection",
   title: "Oren's Cookbook",
@@ -32,16 +40,18 @@ function useSessionState(key, def) {
 
 function SidebarBtn({ label, active, onClick }) {
   const [hovered, setHovered] = useState(false);
+  const { isRTL } = useLanguage();
+  const borderSide = isRTL ? "borderRight" : "borderLeft";
   return (
     <button
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: "block", width: "100%", textAlign: "left",
+        display: "block", width: "100%", textAlign: isRTL ? "right" : "left",
         padding: "8px 12px 8px 9px",
         borderRadius: "8px", border: "none",
-        borderLeft: active ? `3px solid ${t.green}` : "3px solid transparent",
+        [borderSide]: active ? `3px solid ${t.green}` : "3px solid transparent",
         background: active ? t.ink : hovered ? t.green + "22" : "transparent",
         color: active ? "#fff" : hovered ? t.inkMid : t.inkLight,
         fontFamily: sans, fontSize: "11px", letterSpacing: "0.13em", textTransform: "uppercase",
@@ -89,6 +99,7 @@ function CauldronMark() {
 }
 
 export default function App() {
+  const { tr, lang, setLang, isRTL } = useLanguage();
   const [session, setSession] = useState(undefined);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [editingHeader, setEditingHeader] = useState(false);
@@ -99,12 +110,14 @@ export default function App() {
   const [ingredients, setIngredients] = useState([]);
   const [ingredientCategories, setIngredientCategories] = useState([]);
   const [ingredientMappings, setIngredientMappings] = useState([]);
+  const [recipeCategories, setRecipeCategories] = useState(DEFAULT_RECIPE_CATEGORIES);
   const [selectedCategory, setSelectedCategory] = useSessionState("nav_cat", "all");
   const [selectedTagId, setSelectedTagId] = useSessionState("nav_tag", null);
   const [selected, setSelected] = useSessionState("nav_recipe", null);
   const [adding, setAdding] = useState(false);
   const [section, setSection] = useSessionState("nav_section", "recipes");
   const [selectedPlan, setSelectedPlan] = useSessionState("nav_plan", null);
+  const [ingrKey, setIngrKey] = useState(0);
   const [search, setSearch] = useState("");
   const [userRole, setUserRole] = useState("editor");
   const [loading, setLoading] = useState(true);
@@ -147,23 +160,61 @@ export default function App() {
     const { data: profileData } = await supabase.from("profiles").select("role").eq("id", session.user.id).maybeSingle();
     setUserRole(profileData?.role || "editor");
 
-    const [{ data: ingrData }, { data: catData }, { data: mapData }] = await Promise.all([
+    const [{ data: ingrData }, { data: catData }, { data: mapData }, { data: rcData }] = await Promise.all([
       supabase.from("ingredients").select("*").order("name"),
       supabase.from("ingredient_categories").select("*").order("sort_order"),
       supabase.from("ingredient_usda_mapping").select("*"),
+      supabase.from("recipe_categories").select("*").order("sort_order"),
     ]);
     if (ingrData) setIngredients(ingrData);
     if (catData) setIngredientCategories(catData);
     if (mapData) setIngredientMappings(mapData);
+    if (rcData?.length) setRecipeCategories(rcData);
 
     hasLoadedRef.current = true;
     setLoading(false);
+  }
+
+  async function handleCreateRecipeCategory(name) {
+    const { data, error } = await supabase.from("recipe_categories")
+      .insert({ name, sort_order: recipeCategories.length }).select().single();
+    if (error) throw error;
+    setRecipeCategories(prev => [...prev, data]);
+  }
+
+  async function handleUpdateRecipeCategory(id, name) {
+    const { error } = await supabase.from("recipe_categories").update({ name }).eq("id", id);
+    if (error) throw error;
+    setRecipeCategories(prev => prev.map(c => c.id === id ? { ...c, name } : c));
+    // Update matching recipes so their category text stays in sync
+    setRecipes(prev => prev.map(r => {
+      const old = recipeCategories.find(c => c.id === id);
+      return old && r.category === old.name ? { ...r, category: name } : r;
+    }));
+  }
+
+  async function handleDeleteRecipeCategory(id) {
+    const { error } = await supabase.from("recipe_categories").delete().eq("id", id);
+    if (error) throw error;
+    setRecipeCategories(prev => prev.filter(c => c.id !== id));
+    // Don't touch recipes — they still show in "All recipes"
   }
 
   async function saveConfigField(key, value) {
     setConfig(c => ({ ...c, [key]: value }));
     await supabase.from("app_config").upsert({ key, value }, { onConflict: "key" });
   }
+
+  // When navigating away from a section, reset its sub-state so returning starts fresh
+  const navTo = (newSection) => {
+    if (section !== newSection && section === "ingredients") {
+      setIngrKey(k => k + 1);
+      try { sessionStorage.removeItem("ingr_expanded"); } catch {}
+    }
+    setSection(newSection);
+    setSelected(null);
+    setAdding(false);
+  };
 
   const openHeaderEdit = () => { setHeaderDraft({ ...config }); setEditingHeader(true); };
   const saveHeaderEdit = () => {
@@ -315,8 +366,9 @@ export default function App() {
   const inListView         = !selected && !adding && section === "recipes";
   const inPlanListView     = isEditor && section === "mealplans" && !selectedPlan;
   const inTagsView         = isEditor && section === "tags";
+  const inCategoriesView   = isEditor && section === "categories";
   const inIngredientsView  = section === "ingredients";
-  const showSidebar        = !isMobile && (inListView || inPlanListView || inTagsView || inIngredientsView);
+  const showSidebar        = !isMobile && (inListView || inPlanListView || inTagsView || inCategoriesView || inIngredientsView);
 
   const overStyle  = { fontSize: "11px", color: t.green,  fontFamily: sans, letterSpacing: "0.22em", textTransform: "uppercase", margin: "0 0 4px 0" };
   const titleStyle = { fontSize: "clamp(22px, 4vw, 36px)", fontWeight: "400", color: "#F7F3EE", margin: "0 0 3px 0", fontFamily: serif, letterSpacing: "0.01em" };
@@ -324,14 +376,14 @@ export default function App() {
   const inStyle    = (base) => ({ ...base, background: "none", border: "none", borderBottom: "1px solid rgba(255,255,255,0.25)", outline: "none", padding: "2px 0", display: "block", width: "280px", boxSizing: "border-box" });
 
   return (
-    <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }}>
+    <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }} dir={isRTL ? "rtl" : "ltr"}>
       <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle at 15% 85%, rgba(106,158,130,0.07) 0%, transparent 45%), radial-gradient(circle at 85% 15%, rgba(196,122,90,0.07) 0%, transparent 45%)", pointerEvents: "none", zIndex: 0 }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
         <div style={{ background: t.ink, padding: "20px 24px 18px", borderBottom: `3px solid ${t.terra}` }}>
           <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }} dir={isRTL ? "rtl" : "ltr"}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <CauldronMark />
                 <div>
@@ -350,39 +402,49 @@ export default function App() {
                   )}
                 </div>
               </div>
-              {isEditor && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-                  {(inListView || inPlanListView || inTagsView) && (
-                    <div style={{ display: "flex", gap: "8px" }}>
-                      {inListView && (
-                        <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                          + New recipe
-                        </button>
-                      )}
-                      {inPlanListView && (
-                        <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
-                          + New plan
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  {editingHeader ? (
-                    <div style={{ display: "flex", gap: "6px" }}>
-                      <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>Save</button>
-                      <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }}>Cancel</button>
-                    </div>
-                  ) : (
-                    <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer" }}>✎ Edit</button>
-                  )}
-                </div>
-              )}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                {isEditor && (
+                  <>
+                    {(inListView || inPlanListView || inTagsView || inCategoriesView) && (
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        {inListView && (
+                          <button onClick={() => setAdding(true)} style={{ background: t.terra, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                            {tr("btn_new_recipe")}
+                          </button>
+                        )}
+                        {inPlanListView && (
+                          <button onClick={handleCreatePlan} style={{ background: t.green, border: "none", color: "#fff", fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, padding: "8px 18px", borderRadius: "20px", cursor: "pointer" }}>
+                            {tr("btn_new_plan")}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {editingHeader ? (
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        <button onClick={saveHeaderEdit} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 14px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_save")}</button>
+                        <button onClick={() => setEditingHeader(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,0.25)", color: "rgba(255,255,255,0.55)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "6px 12px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_cancel")}</button>
+                      </div>
+                    ) : (
+                      <button onClick={openHeaderEdit} style={{ background: "none", border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.45)", fontFamily: sans, fontSize: "10px", letterSpacing: "0.08em", textTransform: "uppercase", padding: "5px 12px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_edit")}</button>
+                    )}
+                  </>
+                )}
+                {/* Language toggle — always visible */}
+                <button
+                  onClick={() => setLang(lang === "en" ? "he" : "en")}
+                  style={{ background: "none", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.6)", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 13px", borderRadius: "20px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}
+                  title={lang === "en" ? "Switch to Hebrew" : "Switch to English"}
+                >
+                  {tr("lang_toggle")}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Page body */}
         <div style={{ maxWidth: "1000px", margin: "0 auto", padding: isMobile ? "20px 16px 60px" : "28px 20px 60px" }}>
-          {loading && <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>Loading…</div>}
+          {loading && <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>{tr("loading")}</div>}
           {error && (
             <div style={{ background: "#FFF0EE", border: "1px solid #F5C6C0", borderRadius: "8px", padding: "16px", color: "#8B3A3A", fontFamily: sans, fontSize: "13px" }}>
               <strong>Connection error:</strong> {error}
@@ -391,45 +453,43 @@ export default function App() {
           )}
 
           {!loading && !error && adding && (
-            <RecipeForm initial={null} tags={tags} onCancel={() => setAdding(false)} onSave={handleSave} />
+            <RecipeForm initial={null} tags={tags} recipeCategories={recipeCategories} onCancel={() => setAdding(false)} onSave={handleSave} />
           )}
 
           {!loading && !error && !adding && selected && selectedRecipe && (
-            <RecipeDetail recipe={selectedRecipe} tags={tags} isEditor={isEditor} onBack={() => setSelected(null)} onSave={handleSave} onDelete={handleDelete} />
+            <RecipeDetail recipe={selectedRecipe} tags={tags} recipeCategories={recipeCategories} isEditor={isEditor} onBack={() => setSelected(null)} onSave={handleSave} onDelete={handleDelete} />
           )}
 
           {!loading && !error && section === "mealplans" && selectedPlan && selectedPlanData && (
-            <MealPlanDetail plan={selectedPlanData} recipes={recipes} ingredients={ingredients} ingredientCategories={ingredientCategories} ingredientMappings={ingredientMappings} tags={tags} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
+            <MealPlanDetail plan={selectedPlanData} recipes={recipes} ingredients={ingredients} ingredientCategories={ingredientCategories} ingredientMappings={ingredientMappings} tags={tags} recipeCategories={recipeCategories} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
           )}
 
-          {!loading && !error && (inListView || inPlanListView || inTagsView || inIngredientsView) && (
+          {!loading && !error && (inListView || inPlanListView || inTagsView || inCategoriesView || inIngredientsView) && (
             <div style={{ display: "flex", alignItems: "flex-start" }}>
 
               {/* Desktop sidebar */}
               {showSidebar && (
-                <aside style={{ width: "172px", flexShrink: 0, position: "sticky", top: "24px", alignSelf: "flex-start", paddingRight: "20px", borderRight: `1px solid ${t.border}`, marginRight: "24px" }}>
-                  <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Recipes</p>
-                  {CATEGORIES.map(cat => (
-                    <SidebarBtn key={cat}
-                      label={cat === "all" ? "All recipes" : cat}
-                      active={section === "recipes" && selectedCategory === cat}
-                      onClick={() => { setSelectedCategory(cat); setSelectedTagId(null); setSection("recipes"); }}
-                    />
+                <aside style={{ width: "172px", flexShrink: 0, position: "sticky", top: "24px", alignSelf: "flex-start", [isRTL ? "paddingLeft" : "paddingRight"]: "20px", [isRTL ? "borderLeft" : "borderRight"]: `1px solid ${t.border}`, [isRTL ? "marginLeft" : "marginRight"]: "24px" }}>
+                  <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>{tr("nav_recipes")}</p>
+                  <SidebarBtn label={tr("nav_all")} active={section === "recipes" && selectedCategory === "all"} onClick={() => { setSelectedCategory("all"); setSelectedTagId(null); navTo("recipes"); }} />
+                  {recipeCategories.map(cat => (
+                    <SidebarBtn key={cat.id} label={cat.name} active={section === "recipes" && selectedCategory === cat.name} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} />
                   ))}
                   {isEditor && (
                     <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Planning</p>
-                      <SidebarBtn label="Meal plans" active={section === "mealplans"} onClick={() => { setSection("mealplans"); setSelected(null); setAdding(false); }} />
+                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>{tr("nav_planning")}</p>
+                      <SidebarBtn label={tr("nav_mealplans")} active={section === "mealplans"} onClick={() => navTo("mealplans")} />
                     </div>
                   )}
                   <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Ingredients</p>
-                    <SidebarBtn label="Catalogue" active={section === "ingredients"} onClick={() => { setSection("ingredients"); setSelected(null); setAdding(false); }} />
+                    <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>{tr("nav_catalogue")}</p>
+                    <SidebarBtn label={tr("nav_catalogue")} active={section === "ingredients"} onClick={() => navTo("ingredients")} />
                   </div>
                   {isEditor && (
                     <div style={{ borderTop: `1px solid ${t.border}`, marginTop: "14px", paddingTop: "14px" }}>
-                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>Manage</p>
-                      <SidebarBtn label="Tags" active={section === "tags"} onClick={() => { setSection("tags"); setSelected(null); setAdding(false); }} />
+                      <p style={{ fontSize: "10px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 6px 4px" }}>{tr("nav_manage")}</p>
+                      <SidebarBtn label={tr("nav_tags")} active={section === "tags"} onClick={() => navTo("tags")} />
+                      <SidebarBtn label={tr("nav_categories")} active={section === "categories"} onClick={() => navTo("categories")} />
                     </div>
                   )}
                 </aside>
@@ -440,113 +500,64 @@ export default function App() {
                 {/* Mobile nav tabs */}
                 {isMobile && (
                   <div style={{ display: "flex", gap: "4px", marginBottom: "16px", overflowX: "auto", paddingBottom: "4px" }}>
-                    {CATEGORIES.map(cat => (
-                      <button key={cat} onClick={() => { setSelectedCategory(cat); setSelectedTagId(null); setSection("recipes"); }} style={{
-                        padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
-                        background: section === "recipes" && selectedCategory === cat ? t.ink : t.surface2,
-                        color: section === "recipes" && selectedCategory === cat ? "#fff" : t.inkLight,
-                        fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                      }}>{cat === "all" ? "All" : cat}</button>
+                    <button onClick={() => { setSelectedCategory("all"); setSelectedTagId(null); navTo("recipes"); }} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "recipes" && selectedCategory === "all" ? t.ink : t.surface2, color: section === "recipes" && selectedCategory === "all" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", cursor: "pointer" }}>{tr("cat_all")}</button>
+                    {recipeCategories.map(cat => (
+                      <button key={cat.id} onClick={() => { setSelectedCategory(cat.name); setSelectedTagId(null); navTo("recipes"); }} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "recipes" && selectedCategory === cat.name ? t.ink : t.surface2, color: section === "recipes" && selectedCategory === cat.name ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{cat.name}</button>
                     ))}
-                    {isEditor && <button onClick={() => setSection("mealplans")} style={{
-                      padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
-                      background: section === "mealplans" ? t.terra : t.surface2,
-                      color: section === "mealplans" ? "#fff" : t.inkLight,
-                      fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                    }}>Meal plans</button>}
-                    {isEditor && <button onClick={() => setSection("tags")} style={{
-                      padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
-                      background: section === "tags" ? t.green : t.surface2,
-                      color: section === "tags" ? "#fff" : t.inkLight,
-                      fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                    }}>Tags</button>}
-                    <button onClick={() => setSection("ingredients")} style={{
-                      padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap",
-                      background: section === "ingredients" ? t.green : t.surface2,
-                      color: section === "ingredients" ? "#fff" : t.inkLight,
-                      fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                    }}>Ingredients</button>
+                    {isEditor && <button onClick={() => navTo("mealplans")} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "mealplans" ? t.terra : t.surface2, color: section === "mealplans" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tr("nav_mealplans")}</button>}
+                    {isEditor && <button onClick={() => navTo("tags")} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "tags" ? t.green : t.surface2, color: section === "tags" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tr("nav_tags")}</button>}
+                    <button onClick={() => navTo("ingredients")} style={{ padding: "7px 12px", borderRadius: "20px", border: "none", whiteSpace: "nowrap", background: section === "ingredients" ? t.green : t.surface2, color: section === "ingredients" ? "#fff" : t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tr("nav_catalogue")}</button>
                   </div>
                 )}
 
                 {/* Recipes list */}
                 {section === "recipes" && (
                   <div>
-                    {/* Search bar */}
                     <div style={{ position: "relative", marginBottom: "16px" }}>
-                      <span style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: t.inkFaint, pointerEvents: "none" }}>🔍</span>
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        placeholder="Search recipes, ingredients…"
-                        style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "10px 16px 10px 36px", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
-                        onFocus={e => e.target.style.borderColor = t.green}
-                        onBlur={e => e.target.style.borderColor = t.border}
+                      <span style={{ position: "absolute", [isRTL ? "right" : "left"]: "12px", top: "50%", transform: "translateY(-50%)", fontSize: "14px", color: t.inkFaint, pointerEvents: "none" }}>🔍</span>
+                      <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder={tr("search_ph")}
+                        style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: isRTL ? "10px 36px 10px 16px" : "10px 16px 10px 36px", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s" }}
+                        onFocus={e => e.target.style.borderColor = t.green} onBlur={e => e.target.style.borderColor = t.border}
                       />
-                      {search && (
-                        <button onClick={() => setSearch("")} style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontSize: "16px", lineHeight: 1 }}>×</button>
-                      )}
+                      {search && <button onClick={() => setSearch("")} style={{ position: "absolute", [isRTL ? "left" : "right"]: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontSize: "16px", lineHeight: 1 }}>×</button>}
                     </div>
-
                     {tags.length > 0 && (
                       <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "20px", alignItems: "center" }}>
-                        <span style={{ fontSize: "11px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>Filter:</span>
+                        <span style={{ fontSize: "11px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", flexShrink: 0 }}>{tr("search_filter")}</span>
                         {tags.map(tag => {
                           const active = selectedTagId === tag.id;
                           return (
-                            <button key={tag.id} onClick={() => setSelectedTagId(active ? null : tag.id)} style={{
-                              padding: "3px 10px", borderRadius: "20px", border: `1px solid ${tag.color}`,
-                              background: active ? tag.color : "transparent", color: active ? "#fff" : tag.color,
-                              fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
-                            }}>{tag.name}</button>
+                            <button key={tag.id} onClick={() => setSelectedTagId(active ? null : tag.id)} style={{ padding: "3px 10px", borderRadius: "20px", border: `1px solid ${tag.color}`, background: active ? tag.color : "transparent", color: active ? "#fff" : tag.color, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>{tag.name}</button>
                           );
                         })}
-                        {selectedTagId && (
-                          <button onClick={() => setSelectedTagId(null)} style={{ background: "none", border: "none", color: t.inkFaint, fontFamily: sans, fontSize: "11px", cursor: "pointer", padding: "2px 4px" }}>× clear</button>
-                        )}
+                        {selectedTagId && <button onClick={() => setSelectedTagId(null)} style={{ background: "none", border: "none", color: t.inkFaint, fontFamily: sans, fontSize: "11px", cursor: "pointer", padding: "2px 4px" }}>{tr("search_clear")}</button>}
                       </div>
                     )}
                     <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: "0 0 14px 0", paddingBottom: "10px", borderBottom: `1px solid ${t.border}` }}>
-                      {filteredRecipes.length} {filteredRecipes.length === 1 ? "recipe" : "recipes"}
-                      {search && <span style={{ color: t.terra }}> · "{search}"</span>}
+                      {search ? tr("search_count_q", filteredRecipes.length, search) : tr("search_count", filteredRecipes.length)}
                     </p>
                     {filteredRecipes.length === 0 && (
                       <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>
-                        {search ? `No recipes matching "${search}"` : "No recipes in this category."}
+                        {search ? tr("search_none_q", search) : tr("search_none")}
                       </div>
                     )}
                     <div key={`${selectedCategory}-${selectedTagId}`} style={{ display: "flex", flexDirection: "column", gap: "12px", animation: "fadeSlideIn 0.2s ease" }}>
-                      {filteredRecipes.map(r => (
-                        <RecipeCard key={r.id} recipe={r} tags={tags} onClick={() => setSelected(r.id)} />
-                      ))}
+                      {filteredRecipes.map(r => <RecipeCard key={r.id} recipe={r} tags={tags} onClick={() => setSelected(r.id)} />)}
                     </div>
                   </div>
                 )}
 
-                {/* Meal plans list */}
                 {section === "mealplans" && (
                   <MealPlanList plans={mealPlans} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} onDelete={handleDeletePlan} onRename={handleRenamePlan} />
                 )}
-
-                {/* Tags section */}
                 {section === "tags" && (
                   <TagManager tags={tags} onCreate={createTag} onUpdate={updateTag} onDelete={deleteTag} />
                 )}
-
-                {/* Ingredients catalogue */}
+                {section === "categories" && (
+                  <RecipeCategoryManager categories={recipeCategories} onCreate={handleCreateRecipeCategory} onUpdate={handleUpdateRecipeCategory} onDelete={handleDeleteRecipeCategory} />
+                )}
                 {section === "ingredients" && (
-                  <IngredientCatalogue
-                    ingredients={ingredients}
-                    categories={ingredientCategories}
-                    mappings={ingredientMappings}
-                    isEditor={isEditor}
-                    onCreate={handleCreateIngredient}
-                    onUpdate={handleUpdateIngredient}
-                    onDelete={handleDeleteIngredient}
-                    onCreateCategory={handleCreateCategory}
-                    onSaveMapping={handleSaveMapping}
-                  />
+                  <IngredientCatalogue key={ingrKey} ingredients={ingredients} categories={ingredientCategories} mappings={ingredientMappings} isEditor={isEditor} onCreate={handleCreateIngredient} onUpdate={handleUpdateIngredient} onDelete={handleDeleteIngredient} onCreateCategory={handleCreateCategory} onSaveMapping={handleSaveMapping} />
                 )}
               </main>
             </div>

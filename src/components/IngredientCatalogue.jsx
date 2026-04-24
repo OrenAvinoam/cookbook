@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
 import IngredientForm from "./IngredientForm";
-
-const MODE_LABEL = { tracked: "USDA", ignored: "Ignored", custom: "Custom" };
-const MODE_COLOR = { tracked: t.green, ignored: t.inkFaint, custom: t.terra };
+import { useLanguage } from "../i18n";
 
 export default function IngredientCatalogue({
   ingredients, categories, mappings, isEditor,
   onCreate, onUpdate, onDelete, onCreateCategory, onSaveMapping,
 }) {
+  const { tr } = useLanguage();
+  const MODE_LABEL = { tracked: tr("ingr_mode_tracked"), ignored: tr("ingr_mode_ignored"), custom: tr("ingr_mode_custom") };
+  const MODE_COLOR = { tracked: t.green, ignored: t.inkFaint, custom: t.terra };
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState("all");
   const [showForm, setShowForm] = useState(false);
@@ -56,7 +57,7 @@ export default function IngredientCatalogue({
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this ingredient?")) return;
+    if (!confirm(tr("ingr_confirm_delete"))) return;
     await onDelete(id);
     if (expanded === id) setExpanded(null);
   };
@@ -102,7 +103,7 @@ export default function IngredientCatalogue({
             </div>
             {ing.aliases?.length > 0 && (
               <div style={{ fontSize: "12px", fontFamily: sans, color: t.inkFaint, marginTop: "2px" }}>
-                Also: {ing.aliases.join(", ")}
+                {tr("ingr_also")} {ing.aliases.join(", ")}
               </div>
             )}
           </div>
@@ -121,15 +122,15 @@ export default function IngredientCatalogue({
                 <>
                   {mapping.description && (
                     <div>
-                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>USDA Source</span>
+                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>{tr("ingr_usda_source")}</span>
                       <div style={{ fontSize: "13px", fontFamily: sans, color: t.inkMid, marginTop: "2px" }}>{mapping.description}</div>
                     </div>
                   )}
                   {Object.keys(mapping.nutrients || {}).length > 0 && (
                     <div>
-                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>Per 100g</span>
+                      <span style={{ fontSize: "11px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>{tr("ingr_per100g")}</span>
                       <div style={{ display: "flex", gap: "14px", flexWrap: "wrap", marginTop: "6px" }}>
-                        {[["Calories", "calories", "kcal"], ["Protein", "protein", "g"], ["Fat", "totalFat", "g"], ["Carbs", "totalCarb", "g"]].map(([lbl, key, unit]) =>
+                        {[[tr("ingr_calories"), "calories", "kcal"], [tr("ingr_protein"), "protein", "g"], [tr("ingr_fat"), "totalFat", "g"], [tr("ingr_carbs"), "totalCarb", "g"]].map(([lbl, key, unit]) =>
                           mapping.nutrients[key] != null && (
                             <div key={key} style={{ textAlign: "center" }}>
                               <div style={{ fontSize: "16px", fontFamily: serif, color: t.green }}>{mapping.nutrients[key]}<span style={{ fontSize: "10px", color: t.inkFaint, marginLeft: "2px" }}>{unit}</span></div>
@@ -143,7 +144,7 @@ export default function IngredientCatalogue({
                 </>
               )}
               {ing.nutrition_mode === "tracked" && !mapping && (
-                <div style={{ fontSize: "13px", fontFamily: sans, color: t.inkFaint, fontStyle: "italic" }}>No USDA mapping yet</div>
+                <div style={{ fontSize: "13px", fontFamily: sans, color: t.inkFaint, fontStyle: "italic" }}>{tr("ingr_no_usda")}</div>
               )}
             </div>
             {ing.notes && (
@@ -151,8 +152,8 @@ export default function IngredientCatalogue({
             )}
             {isEditor && (
               <div style={{ display: "flex", gap: "8px" }}>
-                <button onClick={() => { setEditTarget(ing); setShowForm(true); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 14px", borderRadius: "20px", cursor: "pointer" }}>Edit</button>
-                <button onClick={() => handleDelete(ing.id)} style={{ background: "none", border: "none", color: t.terra, fontFamily: sans, fontSize: "11px", cursor: "pointer", padding: "5px 8px" }}>Delete</button>
+                <button onClick={() => { setEditTarget(ing); setShowForm(true); }} style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "5px 14px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_edit")}</button>
+                <button onClick={() => handleDelete(ing.id)} style={{ background: "none", border: "none", color: t.terra, fontFamily: sans, fontSize: "11px", cursor: "pointer", padding: "5px 8px" }}>{tr("btn_delete")}</button>
               </div>
             )}
           </div>
@@ -189,22 +190,22 @@ export default function IngredientCatalogue({
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px", flexWrap: "wrap", gap: "8px" }}>
         <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: t.inkFaint, fontFamily: sans, margin: 0 }}>
-          {ingredients.length} ingredient{ingredients.length !== 1 ? "s" : ""}
+          {tr("ingr_count", ingredients.length)}
         </p>
         {isEditor && (
           <div style={{ display: "flex", gap: "8px" }}>
-            <button onClick={() => setShowCatForm(f => !f)} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "7px 14px", borderRadius: "20px", cursor: "pointer" }}>+ Category</button>
-            <button onClick={() => { setEditTarget(null); setShowForm(true); }} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>+ Add ingredient</button>
+            <button onClick={() => setShowCatForm(f => !f)} style={{ background: "transparent", border: `1px solid ${t.border}`, color: t.inkLight, fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "7px 14px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_add_category")}</button>
+            <button onClick={() => { setEditTarget(null); setShowForm(true); }} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", textTransform: "uppercase", padding: "7px 16px", borderRadius: "20px", cursor: "pointer" }}>{tr("btn_add_ingredient")}</button>
           </div>
         )}
       </div>
 
       {showCatForm && (
         <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "16px", padding: "12px", background: t.surface, border: `1px solid ${t.border}`, borderRadius: "8px" }}>
-          <input value={newCatIcon} onChange={e => setNewCatIcon(e.target.value)} placeholder="Icon (emoji)" style={{ width: "60px", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface2, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 8px", outline: "none", textAlign: "center" }} />
-          <input value={newCatName} onChange={e => setNewCatName(e.target.value)} onKeyDown={e => e.key === "Enter" && handleCreateCategory()} placeholder="Category name" style={{ flex: 1, fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface2, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 10px", outline: "none" }} />
-          <button onClick={handleCreateCategory} disabled={!newCatName.trim()} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "7px 14px", borderRadius: "20px", cursor: "pointer", opacity: !newCatName.trim() ? 0.5 : 1 }}>Create</button>
-          <button onClick={() => setShowCatForm(false)} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px" }}>Cancel</button>
+          <input value={newCatIcon} onChange={e => setNewCatIcon(e.target.value)} placeholder={tr("ingr_cat_icon_ph")} style={{ width: "60px", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface2, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 8px", outline: "none", textAlign: "center" }} />
+          <input value={newCatName} onChange={e => setNewCatName(e.target.value)} onKeyDown={e => e.key === "Enter" && handleCreateCategory()} placeholder={tr("ingr_cat_name_ph")} style={{ flex: 1, fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface2, border: `1px solid ${t.border}`, borderRadius: "6px", padding: "7px 10px", outline: "none" }} />
+          <button onClick={handleCreateCategory} disabled={!newCatName.trim()} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "7px 14px", borderRadius: "20px", cursor: "pointer", opacity: !newCatName.trim() ? 0.5 : 1 }}>{tr("btn_create")}</button>
+          <button onClick={() => setShowCatForm(false)} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px" }}>{tr("btn_cancel")}</button>
         </div>
       )}
 
@@ -212,18 +213,18 @@ export default function IngredientCatalogue({
       <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
         <div style={{ position: "relative", flex: 1, minWidth: "200px" }}>
           <span style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", fontSize: "13px", color: t.inkFaint, pointerEvents: "none" }}>🔍</span>
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search ingredients…" style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px 8px 32px", outline: "none", boxSizing: "border-box" }} />
+          <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder={tr("ingr_search_ph")} style={{ width: "100%", fontFamily: sans, fontSize: "13px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px 8px 32px", outline: "none", boxSizing: "border-box" }} />
         </div>
         <select value={selectedCat} onChange={e => setSelectedCat(e.target.value)} style={{ fontFamily: sans, fontSize: "12px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px", outline: "none", cursor: "pointer" }}>
-          <option value="all">All categories</option>
+          <option value="all">{tr("ingr_all_cats")}</option>
           {categories.map(c => <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.name}</option>)}
-          <option value="none">Uncategorized</option>
+          <option value="none">{tr("ingr_uncategorized")}</option>
         </select>
       </div>
 
       {filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: "60px 0", color: t.inkFaint, fontFamily: sans, fontSize: "13px" }}>
-          {ingredients.length === 0 ? "No ingredients yet. Add one above." : `No ingredients matching "${search}".`}
+          {ingredients.length === 0 ? tr("ingr_none_yet") : tr("ingr_no_match", search)}
         </div>
       )}
 
@@ -238,7 +239,7 @@ export default function IngredientCatalogue({
           ))}
           {uncategorized.length > 0 && (
             <>
-              {sectionHdr(`Uncategorized (${uncategorized.length})`)}
+              {sectionHdr(`${tr("ingr_uncategorized")} (${uncategorized.length})`)}
               {renderList(uncategorized)}
             </>
           )}

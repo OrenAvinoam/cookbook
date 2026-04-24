@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { t, serif, sans } from "../theme";
+import { useLanguage } from "../i18n";
 
 export default function MealPlanList({ plans, onCreate, onOpen, onDelete, onRename }) {
+  const { tr } = useLanguage();
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
 
@@ -18,16 +20,16 @@ export default function MealPlanList({ plans, onCreate, onOpen, onDelete, onRena
 
   const handleDelete = (e, id) => {
     e.stopPropagation();
-    if (confirm("Delete this meal plan?")) onDelete(id);
+    if (confirm(tr("mp_confirm_delete"))) onDelete(id);
   };
 
   if (plans.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <p style={{ fontFamily: serif, fontSize: "18px", color: t.inkLight, margin: "0 0 8px 0" }}>No meal plans yet</p>
-        <p style={{ fontFamily: sans, fontSize: "12px", color: t.inkFaint, margin: "0 0 24px 0" }}>Plan your week and generate a shopping list</p>
+        <p style={{ fontFamily: serif, fontSize: "18px", color: t.inkLight, margin: "0 0 8px 0" }}>{tr("mp_empty_title")}</p>
+        <p style={{ fontFamily: sans, fontSize: "12px", color: t.inkFaint, margin: "0 0 24px 0" }}>{tr("mp_empty_sub")}</p>
         <button onClick={onCreate} style={{ background: t.green, border: "none", color: "#fff", fontFamily: sans, fontSize: "11px", letterSpacing: "0.14em", textTransform: "uppercase", padding: "10px 24px", borderRadius: "20px", cursor: "pointer" }}>
-          Create your first plan
+          {tr("mp_create_first")}
         </button>
       </div>
     );
@@ -63,17 +65,16 @@ export default function MealPlanList({ plans, onCreate, onOpen, onDelete, onRena
                 <p style={{ fontFamily: serif, fontSize: "18px", color: t.ink, margin: "0 0 4px 0" }}>{plan.name}</p>
               )}
               <p style={{ fontFamily: sans, fontSize: "11px", color: t.inkFaint, margin: 0, letterSpacing: "0.08em" }}>
-                {uniqueCount} {uniqueCount === 1 ? "recipe" : "recipes"} · {totalSlots} {totalSlots === 1 ? "serving" : "servings"} planned
+                {tr("mp_recipes_count", uniqueCount)} · {tr("mp_servings_count", totalSlots)}
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-              {!isEditing && <span style={{ color: t.green, fontFamily: sans, fontSize: "12px" }}>Open →</span>}
+              {!isEditing && <span style={{ color: t.green, fontFamily: sans, fontSize: "12px" }}>{tr("btn_open")}</span>}
               {!isEditing && (
                 <button
                   onClick={e => startRename(e, plan)}
                   style={{ background: "none", border: `1px solid ${t.border}`, color: t.inkFaint, fontFamily: sans, fontSize: "11px", letterSpacing: "0.08em", padding: "5px 11px", borderRadius: "20px", cursor: "pointer" }}
-                  title="Rename plan"
-                >✎ Edit</button>
+                >{tr("btn_edit")}</button>
               )}
               <button
                 onClick={e => handleDelete(e, plan.id)}

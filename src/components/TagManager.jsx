@@ -9,7 +9,7 @@ const inputStyle = {
 };
 
 export default function TagManager({ tags, onCreate, onUpdate, onDelete }) {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState("#6A9E82");
   const [editId, setEditId] = useState(null);
@@ -64,8 +64,8 @@ export default function TagManager({ tags, onCreate, onUpdate, onDelete }) {
         ) : (
           <div key={tag.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 0", borderBottom: `1px solid ${t.border}` }}>
             <div style={{ width: "14px", height: "14px", borderRadius: "50%", background: tag.color, flexShrink: 0 }} />
-            <span style={{ flex: 1, fontFamily: sans, fontSize: "14px", color: t.inkMid }}>{tag.name}</span>
-            <button onClick={() => { setEditId(tag.id); setEditName(tag.name); setEditColor(tag.color); }} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_edit")}</button>
+            <span style={{ flex: 1, fontFamily: sans, fontSize: "14px", color: t.inkMid }}>{lang === "he" ? (tag.name_he || tag.name) : tag.name}</span>
+            <button onClick={() => { setEditId(tag.id); setEditName(lang === "he" ? (tag.name_he || tag.name) : tag.name); setEditColor(tag.color); }} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_edit")}</button>
             <button onClick={() => handleDelete(tag.id)} style={{ background: "none", border: "none", color: t.terra, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_delete")}</button>
           </div>
         )

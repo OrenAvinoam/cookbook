@@ -117,7 +117,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
     .filter(Boolean);
 
   const accentColor = recipeTags[0]?.color || t.green;
-  const { tr, tcat } = useLanguage();
+  const { tr } = useLanguage();
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
 
   function toggleIngredient(i) {
@@ -188,7 +188,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
           <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "12px" }}>
             {recipe.category && (
               <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
-                {tcat(recipe.category)}
+                {recipe.category_display || recipe.category}
               </span>
             )}
             {recipeTags.map((tag) => (

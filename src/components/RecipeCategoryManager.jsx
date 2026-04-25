@@ -9,7 +9,7 @@ const inputStyle = {
 };
 
 export default function RecipeCategoryManager({ categories, onCreate, onUpdate, onDelete }) {
-  const { tr } = useLanguage();
+  const { tr, lang, tcat } = useLanguage();
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
   const [newName, setNewName] = useState("");
@@ -69,8 +69,8 @@ export default function RecipeCategoryManager({ categories, onCreate, onUpdate, 
           </div>
         ) : (
           <div key={cat.id} style={{ display: "flex", alignItems: "center", gap: "10px", padding: "12px 0", borderBottom: `1px solid ${t.border}` }}>
-            <span style={{ flex: 1, fontFamily: sans, fontSize: "14px", color: t.inkMid, textTransform: "capitalize" }}>{cat.name}</span>
-            <button onClick={() => { setEditId(cat.id); setEditName(cat.name); }} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_edit")}</button>
+            <span style={{ flex: 1, fontFamily: sans, fontSize: "14px", color: t.inkMid, textTransform: "capitalize" }}>{lang === "he" ? (cat.name_he || tcat(cat.name)) : cat.name}</span>
+            <button onClick={() => { setEditId(cat.id); setEditName(lang === "he" ? (cat.name_he || cat.name) : cat.name); }} style={{ background: "none", border: "none", color: t.inkFaint, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_edit")}</button>
             <button onClick={() => handleDelete(cat.id, cat.name)} style={{ background: "none", border: "none", color: t.terra, cursor: "pointer", fontFamily: sans, fontSize: "12px", padding: "2px 8px" }}>{tr("btn_delete")}</button>
           </div>
         )

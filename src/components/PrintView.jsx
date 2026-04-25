@@ -1,4 +1,5 @@
 import { t, serif, sans } from "../theme";
+import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
@@ -19,16 +20,17 @@ function scaleAmount(str, factor) {
 function fmtN(n) { const r = Math.round(n * 100) / 100; return r % 1 === 0 ? String(r) : String(r); }
 
 export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
+  const { tr, lang, isRTL } = useLanguage();
   const recipeTags = (recipe.tag_ids || []).map(id => tags.find(t => t.id === id)).filter(Boolean);
   const accentColor = recipeTags[0]?.color || "#6A9E82";
   const factor = scaleFactor || 1;
 
   const stats = [
-    { l: "Prep", v: recipe.prep_time },
-    { l: "Cook", v: recipe.cook_time },
-    { l: "Total", v: recipe.total_time },
-    { l: "Serves", v: factor !== 1 ? `${Math.round((parseFloat(recipe.servings) || 1) * factor)}` : recipe.servings },
-    { l: "Daily dose", v: recipe.dose },
+    { l: tr("lbl_prep"), v: recipe.prep_time },
+    { l: tr("lbl_cook"), v: recipe.cook_time },
+    { l: tr("lbl_total"), v: recipe.total_time },
+    { l: tr("lbl_servings"), v: factor !== 1 ? `${Math.round((parseFloat(recipe.servings) || 1) * factor)}` : recipe.servings },
+    { l: tr("lbl_dose"), v: recipe.dose },
   ].filter(s => s.v);
 
   return (
@@ -36,31 +38,32 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
       position: "fixed", inset: 0, zIndex: 1000,
       background: "#fff", overflowY: "auto",
       fontFamily: serif,
+      direction: isRTL ? "rtl" : "ltr",
     }}>
       {/* Screen-only close button */}
       <button
         onClick={onClose}
         className="no-print"
         style={{
-          position: "fixed", top: "20px", right: "20px", zIndex: 1001,
+          position: "fixed", top: "20px", [isRTL ? "left" : "right"]: "20px", zIndex: 1001,
           background: t.ink, border: "none", color: "#fff",
           fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
           padding: "8px 16px", borderRadius: "20px", cursor: "pointer",
         }}
       >
-        ← Close
+        {tr("print_close")}
       </button>
       <button
         onClick={() => window.print()}
         className="no-print"
         style={{
-          position: "fixed", top: "20px", right: "110px", zIndex: 1001,
+          position: "fixed", top: "20px", [isRTL ? "left" : "right"]: "110px", zIndex: 1001,
           background: "#6A9E82", border: "none", color: "#fff",
           fontFamily: sans, fontSize: "11px", letterSpacing: "0.12em", textTransform: "uppercase",
           padding: "8px 16px", borderRadius: "20px", cursor: "pointer",
         }}
       >
-        Export PDF
+        {tr("print_export")}
       </button>
 
       <div style={{ maxWidth: "760px", margin: "0 auto", padding: "0 0 60px 0" }}>
@@ -79,7 +82,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
               <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginBottom: "8px" }}>
                 {recipe.category && (
                   <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: "rgba(255,255,255,0.45)", background: "rgba(255,255,255,0.08)", padding: "3px 8px", borderRadius: "20px" }}>
-                    {recipe.category}
+                    {recipe.category_display || recipe.category}
                   </span>
                 )}
                 {recipeTags.map(tag => (
@@ -110,7 +113,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
           {recipe.ingredients?.length > 0 && (
             <section style={{ marginBottom: "32px" }}>
               <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>
-                Ingredients {factor !== 1 && <span style={{ opacity: 0.6 }}>· scaled ×{factor}</span>}
+                {tr("section_ingredients")} {factor !== 1 && <span style={{ opacity: 0.6 }}>· {tr("print_scaled")} ×{factor}</span>}
               </p>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {recipe.ingredients.map((ing, i) => (
@@ -128,7 +131,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
           {/* Steps */}
           {recipe.steps?.length > 0 && (
             <section style={{ marginBottom: "32px" }}>
-              <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>Method</p>
+              <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>{tr("print_method")}</p>
               {recipe.steps.map((step, i) => (
                 <div key={i} style={{ display: "flex", gap: "16px", marginBottom: "20px" }}>
                   <div style={{ width: "30px", height: "30px", borderRadius: "50%", background: accentColor, color: "#fff", fontSize: "13px", fontFamily: sans, fontWeight: "600", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "2px" }}>
@@ -149,7 +152,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
           {/* Notes */}
           {recipe.notes?.filter(n => n.body).length > 0 && (
             <section style={{ marginBottom: "32px" }}>
-              <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>Notes</p>
+              <p style={{ fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase", color: "#C47A5A", fontFamily: sans, margin: "0 0 16px 0", paddingBottom: "8px", borderBottom: "2px solid #C47A5A40" }}>{tr("section_notes")}</p>
               {recipe.notes.filter(n => n.body).map((note, i) => (
                 <div key={i} style={{ background: "#F7F3EE", borderLeft: `3px solid ${accentColor}`, borderRadius: "6px", padding: "12px 16px", marginBottom: "10px" }}>
                   {note.title && <p style={{ fontSize: "10px", color: accentColor, fontFamily: sans, textTransform: "uppercase", letterSpacing: "0.14em", margin: "0 0 4px 0" }}>{note.title}</p>}
@@ -163,7 +166,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
         {/* Footer */}
         <div style={{ borderTop: "1px solid #DDD5C8", margin: "0 40px", padding: "16px 0" }}>
           <p style={{ fontSize: "11px", color: "#B5A898", fontFamily: sans, margin: 0, letterSpacing: "0.1em" }}>
-            Printed from Oren's Cookbook · {new Date().toLocaleDateString()}
+            {tr("print_footer", new Date().toLocaleDateString())}
           </p>
         </div>
       </div>

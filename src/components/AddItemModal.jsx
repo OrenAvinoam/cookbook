@@ -4,7 +4,7 @@ import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 export default function AddItemModal({ recipes, ingredients, categories, mappings, tags, recipeCategories = [], onAdd, onClose }) {
-  const { tr, tcat, isRTL } = useLanguage();
+  const { tr, tcat, isRTL, lang } = useLanguage();
   const [tab, setTab] = useState("recipes");
   const [recipeSearch, setRecipeSearch] = useState("");
   const [recipeCat, setRecipeCat] = useState("all");
@@ -180,7 +180,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
               <div style={{ display: "flex", gap: "5px", flexWrap: "wrap", marginBottom: "12px" }}>
                 <FilterChip active={ingrCat === "all"} onClick={() => setIngrCat("all")} label={tr("modal_cat_all")} />
                 {categories.map(cat => (
-                  <FilterChip key={cat.id} active={ingrCat === cat.id} onClick={() => setIngrCat(cat.id)} label={`${cat.icon ? cat.icon + " " : ""}${cat.name}`} />
+                  <FilterChip key={cat.id} active={ingrCat === cat.id} onClick={() => setIngrCat(cat.id)} label={`${cat.icon ? cat.icon + " " : ""}${lang === "he" ? (cat.name_he || cat.name) : cat.name}`} />
                 ))}
               </div>
 
@@ -192,9 +192,9 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
                   return (
                     <div key={ing.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: t.surface, border: `1px solid ${t.border}`, borderLeft: `3px solid ${t.green}`, borderRadius: "8px" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "15px", fontFamily: serif, color: t.ink }}>{ing.name}</div>
+                        <div style={{ fontSize: "15px", fontFamily: serif, color: t.ink }}>{lang === "he" ? (ing.name_he || ing.name) : ing.name}</div>
                         <div style={{ display: "flex", gap: "8px", marginTop: "2px", flexWrap: "wrap", alignItems: "center" }}>
-                          {cat && <span style={{ fontSize: "10px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>{cat.icon ? `${cat.icon} ` : ""}{cat.name}</span>}
+                          {cat && <span style={{ fontSize: "10px", fontFamily: sans, color: t.inkFaint, letterSpacing: "0.1em", textTransform: "uppercase" }}>{cat.icon ? `${cat.icon} ` : ""}{lang === "he" ? (cat.name_he || cat.name) : cat.name}</span>}
                           {mapping?.nutrients?.calories != null && <span style={{ fontSize: "10px", fontFamily: sans, color: t.terra }}>{mapping.nutrients.calories} kcal/100g</span>}
                         </div>
                       </div>

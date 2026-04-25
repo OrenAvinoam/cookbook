@@ -7,7 +7,7 @@ export default function IngredientCatalogue({
   ingredients, categories, mappings, isEditor,
   onCreate, onUpdate, onDelete, onCreateCategory, onSaveMapping,
 }) {
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
   const MODE_LABEL = { tracked: tr("ingr_mode_tracked"), ignored: tr("ingr_mode_ignored"), custom: tr("ingr_mode_custom") };
   const MODE_COLOR = { tracked: t.green, ignored: t.inkFaint, custom: t.terra };
   const [search, setSearch] = useState("");
@@ -91,10 +91,10 @@ export default function IngredientCatalogue({
         >
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-              <span style={{ fontSize: "16px", fontFamily: serif, color: t.ink }}>{ing.name}</span>
+              <span style={{ fontSize: "16px", fontFamily: serif, color: t.ink }}>{lang === "he" ? (ing.name_he || ing.name) : ing.name}</span>
               {cat && (
                 <span style={{ fontSize: "10px", fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "2px 7px", borderRadius: "20px" }}>
-                  {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                  {cat.icon ? `${cat.icon} ` : ""}{lang === "he" ? (cat.name_he || cat.name) : cat.name}
                 </span>
               )}
               <span style={{ fontSize: "10px", fontFamily: sans, letterSpacing: "0.1em", textTransform: "uppercase", color: MODE_COLOR[ing.nutrition_mode] || t.inkFaint, background: (MODE_COLOR[ing.nutrition_mode] || t.inkFaint) + "18", padding: "2px 7px", borderRadius: "20px", border: `1px solid ${(MODE_COLOR[ing.nutrition_mode] || t.inkFaint)}30` }}>
@@ -217,7 +217,7 @@ export default function IngredientCatalogue({
         </div>
         <select value={selectedCat} onChange={e => setSelectedCat(e.target.value)} style={{ fontFamily: sans, fontSize: "12px", color: t.ink, background: t.surface, border: `1px solid ${t.border}`, borderRadius: "24px", padding: "8px 14px", outline: "none", cursor: "pointer" }}>
           <option value="all">{tr("ingr_all_cats")}</option>
-          {categories.map(c => <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{c.name}</option>)}
+          {categories.map(c => <option key={c.id} value={c.id}>{c.icon ? `${c.icon} ` : ""}{lang === "he" ? (c.name_he || c.name) : c.name}</option>)}
           <option value="none">{tr("ingr_uncategorized")}</option>
         </select>
       </div>
@@ -233,7 +233,7 @@ export default function IngredientCatalogue({
         <>
           {categories.filter(c => (grouped[c.id] || []).length > 0).map(cat => (
             <div key={cat.id}>
-              {sectionHdr(`${cat.icon ? cat.icon + " " : ""}${cat.name} (${grouped[cat.id].length})`)}
+              {sectionHdr(`${cat.icon ? cat.icon + " " : ""}${lang === "he" ? (cat.name_he || cat.name) : cat.name} (${grouped[cat.id].length})`)}
               {renderList(grouped[cat.id])}
             </div>
           ))}

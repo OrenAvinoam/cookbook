@@ -11,6 +11,7 @@ import MealPlanList from "./components/MealPlanList";
 import MealPlanDetail from "./components/MealPlanDetail";
 import IngredientCatalogue from "./components/IngredientCatalogue";
 import { useLanguage } from "./i18n";
+import { translateText, translateRecipeContent, localizeRecipe, localizeItem } from "./lib/translate";
 import "./App.css";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -122,6 +123,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const hasLoadedRef = useRef(false);
+  const isTranslatingRef = useRef(false);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 680);
 
   useEffect(() => {
@@ -175,20 +177,27 @@ export default function App() {
   }
 
   async function handleCreateRecipeCategory(name) {
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = await translateText(name, lang, otherLang);
+    const enName = lang === "en" ? name : translated;
+    const heName = lang === "he" ? name : translated;
     const { data, error } = await supabase.from("recipe_categories")
-      .insert({ name, sort_order: recipeCategories.length }).select().single();
+      .insert({ name: enName, name_he: heName, sort_order: recipeCategories.length }).select().single();
     if (error) throw error;
     setRecipeCategories(prev => [...prev, data]);
   }
 
   async function handleUpdateRecipeCategory(id, name) {
-    const { error } = await supabase.from("recipe_categories").update({ name }).eq("id", id);
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = await translateText(name, lang, otherLang);
+    const enName = lang === "en" ? name : translated;
+    const heName = lang === "he" ? name : translated;
+    const { error } = await supabase.from("recipe_categories").update({ name: enName, name_he: heName }).eq("id", id);
     if (error) throw error;
-    setRecipeCategories(prev => prev.map(c => c.id === id ? { ...c, name } : c));
-    // Update matching recipes so their category text stays in sync
+    setRecipeCategories(prev => prev.map(c => c.id === id ? { ...c, name: enName, name_he: heName } : c));
     setRecipes(prev => prev.map(r => {
       const old = recipeCategories.find(c => c.id === id);
-      return old && r.category === old.name ? { ...r, category: name } : r;
+      return old && r.category === old.name ? { ...r, category: enName } : r;
     }));
   }
 
@@ -215,9 +224,35 @@ export default function App() {
     setAdding(false);
   };
 
-  const openHeaderEdit = () => { setHeaderDraft({ ...config }); setEditingHeader(true); };
-  const saveHeaderEdit = () => {
-    ["overtitle", "title", "subtitle"].forEach(f => { if (headerDraft[f] !== config[f]) saveConfigField(f, headerDraft[f]); });
+  // Returns a recipe ready for display in the current language.
+  // Adds category_display so display components don't need recipeCategories lookup.
+  const enrichForDisplay = (recipe) => {
+    const loc = localizeRecipe(recipe, lang);
+    const cat = recipeCategories.find(c => c.name === recipe.category);
+    const catDisplay = lang === "he" ? (cat?.name_he || tcat(recipe.category)) : recipe.category;
+    return { ...loc, category_display: catDisplay };
+  };
+
+  const openHeaderEdit = () => {
+    setHeaderDraft({
+      overtitle: lang === "he" ? (config.overtitle_he || config.overtitle) : config.overtitle,
+      title:     lang === "he" ? (config.title_he     || config.title)     : config.title,
+      subtitle:  lang === "he" ? (config.subtitle_he  || config.subtitle)  : config.subtitle,
+    });
+    setEditingHeader(true);
+  };
+  const saveHeaderEdit = async () => {
+    const otherLang = lang === "en" ? "he" : "en";
+    for (const f of ["overtitle", "title", "subtitle"]) {
+      const val = headerDraft[f] || "";
+      if (lang === "en") {
+        await saveConfigField(f, val);
+        if (val.trim()) { const he = await translateText(val, "en", "he"); await saveConfigField(`${f}_he`, he); }
+      } else {
+        await saveConfigField(`${f}_he`, val);
+        if (val.trim()) { const en = await translateText(val, "he", "en"); await saveConfigField(f, en); }
+      }
+    }
     setEditingHeader(false);
   };
 
@@ -233,15 +268,24 @@ export default function App() {
   });
 
   async function handleSave(form) {
+    const otherLang = lang === "en" ? "he" : "en";
+    const srcContent = {
+      title: form.title, description: form.description,
+      ingredients: form.ingredients || [], steps: form.steps || [], notes: form.notes || [],
+    };
+    const tgtContent = await translateRecipeContent(srcContent, lang, otherLang);
+    const enContent  = lang === "en" ? srcContent : tgtContent;
+    const heContent  = lang === "he" ? srcContent : tgtContent;
+
     const payload = {
-      title: form.title, emoji: form.emoji, description: form.description,
-      category: form.category || "other", tag_ids: form.tag_ids || [],
+      emoji: form.emoji, category: form.category || "other", tag_ids: form.tag_ids || [],
       servings: form.servings, prep_time: form.prep_time, cook_time: form.cook_time,
       total_time: form.total_time, dose: form.dose,
-      ingredients: form.ingredients, steps: form.steps, notes: form.notes,
-      nutrition: form.nutrition || null,
-      image_url: form.image_url || null,
+      nutrition: form.nutrition || null, image_url: form.image_url || null,
       image_position: form.image_position || "50% 50%",
+      title: enContent.title, description: enContent.description,
+      ingredients: enContent.ingredients, steps: enContent.steps, notes: enContent.notes,
+      translations: { he: heContent },
     };
     if (form.id) {
       const { error } = await supabase.from("recipes").update(payload).eq("id", form.id);
@@ -264,15 +308,26 @@ export default function App() {
   }
 
   async function createTag(name, color) {
-    const { data, error } = await supabase.from("tags").insert({ name, color }).select().single();
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = await translateText(name, lang, otherLang);
+    const enName = lang === "en" ? name : translated;
+    const heName = lang === "he" ? name : translated;
+    const { data, error } = await supabase.from("tags").insert({ name: enName, color, name_he: heName }).select().single();
     if (error) throw error;
     setTags(prev => [...prev, data].sort((a, b) => a.name.localeCompare(b.name)));
   }
 
   async function updateTag(id, updates) {
-    const { error } = await supabase.from("tags").update(updates).eq("id", id);
+    let finalUpdates = { ...updates };
+    if (updates.name) {
+      const otherLang = lang === "en" ? "he" : "en";
+      const translated = await translateText(updates.name, lang, otherLang);
+      finalUpdates.name    = lang === "en" ? updates.name : translated;
+      finalUpdates.name_he = lang === "he" ? updates.name : translated;
+    }
+    const { error } = await supabase.from("tags").update(finalUpdates).eq("id", id);
     if (error) throw error;
-    setTags(prev => prev.map(tg => tg.id === id ? { ...tg, ...updates } : tg));
+    setTags(prev => prev.map(tg => tg.id === id ? { ...tg, ...finalUpdates } : tg));
   }
 
   async function deleteTag(id) {
@@ -299,22 +354,38 @@ export default function App() {
   }
 
   async function handleRenamePlan(id, name) {
-    const { error } = await supabase.from("meal_plans").update({ name }).eq("id", id);
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = await translateText(name, lang, otherLang);
+    const enName = lang === "en" ? name : translated;
+    const heName = lang === "he" ? name : translated;
+    const { error } = await supabase.from("meal_plans").update({ name: enName, name_he: heName }).eq("id", id);
     if (error) { alert("Rename failed: " + error.message); return; }
-    setMealPlans(prev => prev.map(p => p.id === id ? { ...p, name } : p));
+    setMealPlans(prev => prev.map(p => p.id === id ? { ...p, name: enName, name_he: heName } : p));
   }
 
   async function handleCreateIngredient(data) {
-    const { data: row, error } = await supabase.from("ingredients").insert(data).select().single();
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = data.name ? await translateText(data.name, lang, otherLang) : "";
+    const enName = lang === "en" ? data.name : translated;
+    const heName = lang === "he" ? data.name : translated;
+    const payload = { ...data, name: enName, name_he: heName };
+    const { data: row, error } = await supabase.from("ingredients").insert(payload).select().single();
     if (error) throw error;
     setIngredients(prev => [...prev, row].sort((a, b) => a.name.localeCompare(b.name)));
     return row;
   }
 
   async function handleUpdateIngredient(id, updates) {
-    const { error } = await supabase.from("ingredients").update(updates).eq("id", id);
+    let finalUpdates = { ...updates };
+    if (updates.name) {
+      const otherLang = lang === "en" ? "he" : "en";
+      const translated = await translateText(updates.name, lang, otherLang);
+      finalUpdates.name    = lang === "en" ? updates.name : translated;
+      finalUpdates.name_he = lang === "he" ? updates.name : translated;
+    }
+    const { error } = await supabase.from("ingredients").update(finalUpdates).eq("id", id);
     if (error) throw error;
-    setIngredients(prev => prev.map(i => i.id === id ? { ...i, ...updates } : i));
+    setIngredients(prev => prev.map(i => i.id === id ? { ...i, ...finalUpdates } : i));
   }
 
   async function handleDeleteIngredient(id) {
@@ -325,7 +396,11 @@ export default function App() {
   }
 
   async function handleCreateCategory(data) {
-    const { data: row, error } = await supabase.from("ingredient_categories").insert(data).select().single();
+    const otherLang = lang === "en" ? "he" : "en";
+    const translated = data.name ? await translateText(data.name, lang, otherLang) : "";
+    const enName = lang === "en" ? data.name : translated;
+    const heName = lang === "he" ? data.name : translated;
+    const { data: row, error } = await supabase.from("ingredient_categories").insert({ ...data, name: enName, name_he: heName }).select().single();
     if (error) throw error;
     setIngredientCategories(prev => [...prev, row].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0)));
     return row;
@@ -343,10 +418,80 @@ export default function App() {
 
   async function handleCreatePlan() {
     const days = Object.fromEntries(DAYS.map(d => [d, []]));
-    const { data, error } = await supabase.from("meal_plans").insert({ name: "Week Plan", days }).select().single();
+    const name_he = await translateText("Week Plan", "en", "he");
+    const { data, error } = await supabase.from("meal_plans").insert({ name: "Week Plan", name_he, days }).select().single();
     if (error) { alert("Failed: " + error.message); return; }
     setMealPlans(prev => [data, ...prev]);
     setSelectedPlan(data.id);
+  }
+
+  // Auto-translate all existing content the first time Hebrew is selected (and after any new content is added)
+  useEffect(() => {
+    if (lang === "he" && !loading && !isTranslatingRef.current) {
+      isTranslatingRef.current = true;
+      translateMissingContent().finally(() => { isTranslatingRef.current = false; });
+    }
+  }, [lang, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function translateMissingContent() {
+    // Recipes (sequential to avoid rate-limiting; each recipe fans out internally)
+    for (const recipe of recipes.filter(r => !r.translations?.he?.title)) {
+      try {
+        const src = { title: recipe.title, description: recipe.description, ingredients: recipe.ingredients || [], steps: recipe.steps || [], notes: recipe.notes || [] };
+        const he = await translateRecipeContent(src, "en", "he");
+        const translations = { ...(recipe.translations || {}), he };
+        await supabase.from("recipes").update({ translations }).eq("id", recipe.id);
+        setRecipes(prev => prev.map(r => r.id === recipe.id ? { ...r, translations } : r));
+      } catch (e) { console.warn("recipe translate failed", recipe.id, e); }
+    }
+    // Tags, ingredient categories, recipe categories, plans — parallel (1 call each)
+    await Promise.all([
+      ...tags.filter(t => !t.name_he).map(async tag => {
+        try {
+          const name_he = await translateText(tag.name, "en", "he");
+          await supabase.from("tags").update({ name_he }).eq("id", tag.id);
+          setTags(prev => prev.map(t => t.id === tag.id ? { ...t, name_he } : t));
+        } catch {}
+      }),
+      ...ingredientCategories.filter(c => !c.name_he).map(async cat => {
+        try {
+          const name_he = await translateText(cat.name, "en", "he");
+          await supabase.from("ingredient_categories").update({ name_he }).eq("id", cat.id);
+          setIngredientCategories(prev => prev.map(c => c.id === cat.id ? { ...c, name_he } : c));
+        } catch {}
+      }),
+      ...recipeCategories.filter(c => !c.name_he).map(async cat => {
+        try {
+          const name_he = await translateText(cat.name, "en", "he");
+          await supabase.from("recipe_categories").update({ name_he }).eq("id", cat.id);
+          setRecipeCategories(prev => prev.map(c => c.id === cat.id ? { ...c, name_he } : c));
+        } catch {}
+      }),
+      ...mealPlans.filter(p => !p.name_he).map(async plan => {
+        try {
+          const name_he = await translateText(plan.name, "en", "he");
+          await supabase.from("meal_plans").update({ name_he }).eq("id", plan.id);
+          setMealPlans(prev => prev.map(p => p.id === plan.id ? { ...p, name_he } : p));
+        } catch {}
+      }),
+    ]);
+    // Ingredients (sequential — catalogue can be large)
+    for (const ing of ingredients.filter(i => !i.name_he)) {
+      try {
+        const name_he = await translateText(ing.name, "en", "he");
+        await supabase.from("ingredients").update({ name_he }).eq("id", ing.id);
+        setIngredients(prev => prev.map(i => i.id === ing.id ? { ...i, name_he } : i));
+      } catch {}
+    }
+    // Header config keys
+    for (const f of ["overtitle", "title", "subtitle"]) {
+      if (config[f] && !config[`${f}_he`]) {
+        try {
+          const he = await translateText(config[f], "en", "he");
+          await saveConfigField(`${f}_he`, he);
+        } catch {}
+      }
+    }
   }
 
   if (session === undefined) {
@@ -412,9 +557,9 @@ export default function App() {
                     </>
                   ) : (
                     <>
-                      <p style={overStyle}>{config.overtitle}</p>
-                      <h1 style={titleStyle}>{config.title}</h1>
-                      <p style={subStyle}>{config.subtitle}</p>
+                      <p style={overStyle}>{lang === "he" ? (config.overtitle_he || config.overtitle) : config.overtitle}</p>
+                      <h1 style={titleStyle}>{lang === "he" ? (config.title_he || config.title) : config.title}</h1>
+                      <p style={subStyle}>{lang === "he" ? (config.subtitle_he || config.subtitle) : config.subtitle}</p>
                     </>
                   )}
                 </div>
@@ -453,11 +598,30 @@ export default function App() {
           )}
 
           {!loading && !error && !adding && selected && selectedRecipe && (
-            <RecipeDetail recipe={selectedRecipe} tags={tags} recipeCategories={recipeCategories} isEditor={isEditor} onBack={() => setSelected(null)} onSave={handleSave} onDelete={handleDelete} />
+            <RecipeDetail
+              recipe={enrichForDisplay(selectedRecipe)}
+              tags={tags.map(t => localizeItem(t, lang))}
+              recipeCategories={recipeCategories}
+              isEditor={isEditor}
+              onBack={() => setSelected(null)}
+              onSave={handleSave}
+              onDelete={handleDelete}
+            />
           )}
 
           {!loading && !error && section === "mealplans" && selectedPlan && selectedPlanData && (
-            <MealPlanDetail plan={selectedPlanData} recipes={recipes} ingredients={ingredients} ingredientCategories={ingredientCategories} ingredientMappings={ingredientMappings} tags={tags} recipeCategories={recipeCategories} onBack={() => setSelectedPlan(null)} onSave={handleSavePlan} onDelete={handleDeletePlan} />
+            <MealPlanDetail
+              plan={localizeItem(selectedPlanData, lang)}
+              recipes={recipes.map(r => enrichForDisplay(r))}
+              ingredients={ingredients.map(i => localizeItem(i, lang))}
+              ingredientCategories={ingredientCategories.map(c => localizeItem(c, lang))}
+              ingredientMappings={ingredientMappings}
+              tags={tags.map(t => localizeItem(t, lang))}
+              recipeCategories={recipeCategories}
+              onBack={() => setSelectedPlan(null)}
+              onSave={handleSavePlan}
+              onDelete={handleDeletePlan}
+            />
           )}
 
           {!loading && !error && (inListView || inPlanListView || inTagsView || inCategoriesView || inIngredientsView) && (
@@ -538,13 +702,13 @@ export default function App() {
                       </div>
                     )}
                     <div key={`${selectedCategory}-${selectedTagId}`} style={{ display: "flex", flexDirection: "column", gap: "12px", animation: "fadeSlideIn 0.2s ease" }}>
-                      {filteredRecipes.map(r => <RecipeCard key={r.id} recipe={r} tags={tags} onClick={() => setSelected(r.id)} />)}
+                      {filteredRecipes.map(r => <RecipeCard key={r.id} recipe={enrichForDisplay(r)} tags={tags.map(t => localizeItem(t, lang))} onClick={() => setSelected(r.id)} />)}
                     </div>
                   </div>
                 )}
 
                 {section === "mealplans" && (
-                  <MealPlanList plans={mealPlans} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} onDelete={handleDeletePlan} onRename={handleRenamePlan} />
+                  <MealPlanList plans={mealPlans.map(p => localizeItem(p, lang))} onCreate={handleCreatePlan} onOpen={id => setSelectedPlan(id)} onDelete={handleDeletePlan} onRename={handleRenamePlan} />
                 )}
                 {section === "tags" && (
                   <TagManager tags={tags} onCreate={createTag} onUpdate={updateTag} onDelete={deleteTag} />

@@ -6,7 +6,7 @@ const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', s
 
 export default function RecipeCard({ recipe, tags, onClick }) {
   const [hovered, setHovered] = useState(false);
-  const { tr, tcat, isRTL } = useLanguage();
+  const { tr, isRTL } = useLanguage();
 
   const recipeTags = (recipe.tag_ids || [])
     .map((id) => tags.find((tg) => tg.id === id))
@@ -34,7 +34,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
         <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {recipe.category && (
             <span style={{ fontSize: "10px", letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: sans, color: t.inkFaint, background: t.surface2, border: `1px solid ${t.border}`, padding: "3px 8px", borderRadius: "20px" }}>
-              {tcat(recipe.category)}
+              {recipe.category_display || recipe.category}
             </span>
           )}
           {recipeTags.map((tag) => (

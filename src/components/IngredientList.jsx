@@ -1,6 +1,9 @@
 import { t, serif, sans, body } from "../theme";
+import { useLanguage } from "../i18n";
+import { localizeAmount } from "../lib/translate";
 
 export default function IngredientList({ ingredients, accentColor, cookMode, checkedItems, onToggle }) {
+  const { lang } = useLanguage();
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
       {ingredients.map((ing, i) => {
@@ -11,8 +14,8 @@ export default function IngredientList({ ingredients, accentColor, cookMode, che
             onClick={() => cookMode && onToggle(i)}
             style={{
               display: "flex", gap: "12px", alignItems: "center",
-              padding: "10px 14px", background: checked ? t.surface2 : t.surface2,
-              borderRadius: "8px", border: `1px solid ${checked ? t.border : t.border}`,
+              padding: "10px 14px", background: t.surface2,
+              borderRadius: "8px", border: `1px solid ${t.border}`,
               cursor: cookMode ? "pointer" : "default",
               opacity: checked ? 0.5 : 1,
               transition: "opacity 0.2s",
@@ -34,7 +37,7 @@ export default function IngredientList({ ingredients, accentColor, cookMode, che
               flexShrink: 0, minWidth: "80px",
               textDecoration: checked ? "line-through" : "none",
             }}>
-              {ing.amount}
+              {localizeAmount(ing.amount, lang)}
             </span>
             <span style={{
               fontSize: "20px", color: t.inkMid, fontFamily: body,

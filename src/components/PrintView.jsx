@@ -1,6 +1,6 @@
 import { t, serif, sans } from "../theme";
 import { useLanguage } from "../i18n";
-import { localizeTime } from "../lib/translate";
+import { localizeTime, localizeAmount } from "../lib/translate";
 
 function parseImagePos(str) {
   const p = (str || "50% 50%").trim().split(/\s+/);
@@ -126,7 +126,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
                 {recipe.ingredients.map((ing, i) => (
                   <div key={i} style={{ display: "flex", gap: "20px", alignItems: "baseline", padding: "7px 0", borderBottom: i < recipe.ingredients.length - 1 ? "1px solid #EEE9E2" : "none" }}>
                     <span style={{ fontSize: "14px", color: accentColor, fontFamily: serif, fontWeight: "500", flexShrink: 0, minWidth: "90px" }}>
-                      {scaleAmount(ing.amount, factor)}
+                      {localizeAmount(scaleAmount(ing.amount, factor), lang)}
                     </span>
                     <span style={{ fontSize: "14px", color: "#5C4E3C", fontFamily: serif }}>{ing.name}</span>
                   </div>

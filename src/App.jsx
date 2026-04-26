@@ -11,7 +11,7 @@ import MealPlanList from "./components/MealPlanList";
 import MealPlanDetail from "./components/MealPlanDetail";
 import IngredientCatalogue from "./components/IngredientCatalogue";
 import { useLanguage } from "./i18n";
-import { translateText, translateRecipeContent, localizeRecipe, localizeItem } from "./lib/translate";
+import { translateText, translateIngredientName, translateRecipeContent, localizeRecipe, localizeItem } from "./lib/translate";
 import "./App.css";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -271,6 +271,7 @@ export default function App() {
     const otherLang = lang === "en" ? "he" : "en";
     const srcContent = {
       title: form.title, description: form.description,
+      dose: form.dose, total_time: form.total_time,
       ingredients: form.ingredients || [], steps: form.steps || [], notes: form.notes || [],
     };
     const tgtContent = await translateRecipeContent(srcContent, lang, otherLang);
@@ -365,9 +366,13 @@ export default function App() {
 
   async function handleCreateIngredient(data) {
     const otherLang = lang === "en" ? "he" : "en";
-    const translated = data.name ? await translateText(data.name, lang, otherLang) : "";
-    const enName = lang === "en" ? data.name : translated;
-    const heName = lang === "he" ? data.name : translated;
+    // Respect manually-provided name_he override (from IngredientForm); only auto-translate if absent
+    let heName = data.name_he?.trim() || null;
+    if (!heName) {
+      const translated = data.name ? await translateIngredientName(data.name, lang, otherLang) : "";
+      heName = lang === "he" ? data.name : translated;
+    }
+    const enName = lang === "en" ? data.name : (data.name ? await translateIngredientName(data.name, "he", "en") : data.name);
     const payload = { ...data, name: enName, name_he: heName };
     const { data: row, error } = await supabase.from("ingredients").insert(payload).select().single();
     if (error) throw error;
@@ -379,9 +384,15 @@ export default function App() {
     let finalUpdates = { ...updates };
     if (updates.name) {
       const otherLang = lang === "en" ? "he" : "en";
-      const translated = await translateText(updates.name, lang, otherLang);
-      finalUpdates.name    = lang === "en" ? updates.name : translated;
-      finalUpdates.name_he = lang === "he" ? updates.name : translated;
+      // If a manual Hebrew override was provided, use it directly
+      if (updates.name_he?.trim()) {
+        finalUpdates.name    = lang === "en" ? updates.name : await translateIngredientName(updates.name, "he", "en");
+        finalUpdates.name_he = updates.name_he.trim();
+      } else {
+        const translated = await translateIngredientName(updates.name, lang, otherLang);
+        finalUpdates.name    = lang === "en" ? updates.name : translated;
+        finalUpdates.name_he = lang === "he" ? updates.name : translated;
+      }
     }
     const { error } = await supabase.from("ingredients").update(finalUpdates).eq("id", id);
     if (error) throw error;
@@ -437,7 +448,7 @@ export default function App() {
     // Recipes (sequential to avoid rate-limiting; each recipe fans out internally)
     for (const recipe of recipes.filter(r => !r.translations?.he?.title)) {
       try {
-        const src = { title: recipe.title, description: recipe.description, ingredients: recipe.ingredients || [], steps: recipe.steps || [], notes: recipe.notes || [] };
+        const src = { title: recipe.title, description: recipe.description, dose: recipe.dose, total_time: recipe.total_time, ingredients: recipe.ingredients || [], steps: recipe.steps || [], notes: recipe.notes || [] };
         const he = await translateRecipeContent(src, "en", "he");
         const translations = { ...(recipe.translations || {}), he };
         await supabase.from("recipes").update({ translations }).eq("id", recipe.id);
@@ -478,7 +489,7 @@ export default function App() {
     // Ingredients (sequential — catalogue can be large)
     for (const ing of ingredients.filter(i => !i.name_he)) {
       try {
-        const name_he = await translateText(ing.name, "en", "he");
+        const name_he = await translateIngredientName(ing.name, "en", "he");
         await supabase.from("ingredients").update({ name_he }).eq("id", ing.id);
         setIngredients(prev => prev.map(i => i.id === ing.id ? { ...i, name_he } : i));
       } catch {}

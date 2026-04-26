@@ -33,6 +33,7 @@ export default function IngredientForm({ initial, categories, existingMapping, o
     }
     return {
       name: initial?.name || "",
+      name_he: initial?.name_he || "",
       aliases: (initial?.aliases || []).join(", "),
       category_id: initial?.category_id || "",
       default_unit: initial?.default_unit || "g",
@@ -57,6 +58,7 @@ export default function IngredientForm({ initial, categories, existingMapping, o
     try {
       const payload = {
         name: form.name.trim(),
+        name_he: form.name_he.trim() || undefined,  // undefined = let App auto-translate
         aliases: form.aliases.split(",").map(s => s.trim()).filter(Boolean),
         category_id: form.category_id || null,
         default_unit: form.default_unit,
@@ -89,6 +91,17 @@ export default function IngredientForm({ initial, categories, existingMapping, o
             {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
           </select>
         </div>
+      </div>
+
+      <div style={{ marginBottom: "16px" }}>
+        {label("Hebrew name (optional override)")}
+        <input
+          value={form.name_he}
+          onChange={e => set("name_he", e.target.value)}
+          placeholder="Auto-translated if left blank (e.g. רגלי עוף)"
+          dir="rtl"
+          style={inputStyle()}
+        />
       </div>
 
       <div style={{ marginBottom: "16px" }}>

@@ -521,14 +521,25 @@ export default function App() {
 
   return (
     <div style={{ background: t.bg, minHeight: "100vh", color: t.ink }} dir={isRTL ? "rtl" : "ltr"}>
-      <div style={{ position: "fixed", inset: 0, backgroundImage: "radial-gradient(circle at 15% 85%, rgba(106,158,130,0.07) 0%, transparent 45%), radial-gradient(circle at 85% 15%, rgba(196,122,90,0.07) 0%, transparent 45%)", pointerEvents: "none", zIndex: 0 }} />
+      {/* Background: sage green blobs + subtle dot grid */}
+      <div style={{
+        position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0,
+        backgroundImage: [
+          "radial-gradient(ellipse 60% 55% at 0% 100%, rgba(106,158,130,0.14) 0%, transparent 70%)",
+          "radial-gradient(ellipse 40% 40% at 100% 0%, rgba(106,158,130,0.09) 0%, transparent 70%)",
+          "radial-gradient(ellipse 30% 30% at 80% 85%, rgba(106,158,130,0.06) 0%, transparent 70%)",
+          "radial-gradient(circle at 85% 15%, rgba(196,122,90,0.06) 0%, transparent 45%)",
+          "radial-gradient(rgba(106,158,130,0.055) 1.5px, transparent 1.5px)",
+        ].join(", "),
+        backgroundSize: "auto, auto, auto, auto, 30px 30px",
+      }} />
 
       <div style={{ position: "relative", zIndex: 1 }}>
         {/* Header */}
         <div style={{ background: t.ink, padding: "10px 24px 18px", borderBottom: `3px solid ${t.terra}` }}>
           <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-            {/* Top-left utility row: language toggle + header edit controls (always visible, always left) */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
+            {/* Top-left utility row: always physically left, regardless of language direction */}
+            <div dir="ltr" style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "14px" }}>
               <button
                 onClick={() => setLang(lang === "en" ? "he" : "en")}
                 style={{ background: "none", border: "1px solid rgba(255,255,255,0.22)", color: "rgba(255,255,255,0.65)", fontFamily: sans, fontSize: "11px", letterSpacing: "0.1em", padding: "4px 12px", borderRadius: "20px", cursor: "pointer", transition: "border-color 0.2s, color 0.2s" }}

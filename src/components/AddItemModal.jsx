@@ -3,6 +3,11 @@ import { t, serif, sans } from "../theme";
 import { useLanguage } from "../i18n";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
+
+function parseImagePos(str) {
+  const p = (str || "50% 50%").trim().split(/\s+/);
+  return { pos: `${p[0] || "50%"} ${p[1] || "50%"}`, scale: p[2] ? parseFloat(p[2]) : 1 };
+}
 export default function AddItemModal({ recipes, ingredients, categories, mappings, tags, recipeCategories = [], onAdd, onClose }) {
   const { tr, tcat, isRTL, lang } = useLanguage();
   const [tab, setTab] = useState("recipes");
@@ -145,7 +150,7 @@ export default function AddItemModal({ recipes, ingredients, categories, mapping
                     <div key={r.id} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", background: t.surface, border: `1px solid ${t.border}`, borderLeft: `3px solid ${accent}`, borderRadius: "8px" }}>
                       {r.image_url ? (
                         <div style={{ width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `1px solid ${accent}30` }}>
-                          <img src={r.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: r.image_position || "50% 50%" }} />
+                          {(() => { const ip = parseImagePos(r.image_position); return <img src={r.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: ip.pos, transform: ip.scale !== 1 ? `scale(${ip.scale})` : undefined, transformOrigin: "center" }} />; })()}
                         </div>
                       ) : (
                         <span style={{ fontSize: "22px", fontFamily: EMOJI_FONT, flexShrink: 0 }}>{r.emoji}</span>

@@ -1,11 +1,18 @@
 // Google Translate unofficial free endpoint — no API key required
 const GT = "https://translate.googleapis.com/translate_a/single";
 
+// Strip Hebrew niqqud (vowel diacritics U+0591–U+05C7) from a string
+function stripNikud(s) {
+  if (!s) return s;
+  return s.replace(/[\u0591-\u05C7]/g, "");
+}
+
 async function gtFetch(text, from, to) {
   const r = await fetch(`${GT}?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`);
   if (!r.ok) throw new Error(`GT HTTP ${r.status}`);
   const d = await r.json();
-  return d[0].map(x => x[0]).join("");
+  const result = d[0].map(x => x[0]).join("");
+  return to === "he" ? stripNikud(result) : result;
 }
 
 export async function translateText(text, from = "en", to = "he") {
@@ -53,4 +60,68 @@ export function localizeRecipe(recipe, lang) {
 export function localizeItem(item, lang) {
   if (!item || lang === "en") return item;
   return { ...item, name: item.name_he || item.name };
+}
+
+// Convert a time string like "30 min", "1.5 hours", "1h 30m" to Hebrew.
+// Returns the original string unchanged if it cannot be parsed or lang !== "he".
+export function localizeTime(str, lang) {
+  if (!str || lang !== "he") return str;
+  const s = str.trim().toLowerCase();
+
+  // Special cases
+  if (/overnight|over\s*night/.test(s)) return "לילה שלם";
+  if (/few\s*days|couple\s*of\s*days/.test(s)) return "כמה ימים";
+
+  let hours = 0, mins = 0;
+
+  // "H:MM" or "HH:MM"
+  let m = s.match(/^(\d+):(\d{2})$/);
+  if (m) { hours = parseInt(m[1]); mins = parseInt(m[2]); }
+
+  // "Xh Ym" or "X hour(s) [and] Y min(s)"
+  if (!hours && !mins) {
+    m = s.match(/(\d+(?:[.,]\d+)?)\s*(?:h(?:r?s?|ours?)?)[\s,]+(?:and\s+)?(\d+(?:[.,]\d+)?)\s*(?:m(?:in(?:utes?|s?)?)?)/);
+    if (m) { hours = parseFloat(m[1]); mins = parseFloat(m[2]); }
+  }
+
+  // Just hours: "Xh" / "X hr" / "X hour(s)"
+  if (!hours && !mins) {
+    m = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:h(?:r?s?|ours?)?)\s*$/);
+    if (m) hours = parseFloat(m[1].replace(",", "."));
+  }
+
+  // Just minutes: "X min(s)" / "X minute(s)"
+  if (!hours && !mins) {
+    m = s.match(/^(\d+(?:[.,]\d+)?)\s*(?:m(?:in(?:utes?|s?)?)?)\s*$/);
+    if (m) mins = parseFloat(m[1].replace(",", "."));
+  }
+
+  if (!hours && !mins) return str; // unparseable
+
+  // Distribute fractional hours into minutes
+  if (hours % 1 !== 0) {
+    mins += Math.round((hours % 1) * 60);
+    hours = Math.floor(hours);
+  }
+  mins = Math.round(mins);
+
+  const heHours = h => {
+    if (h === 1) return "שעה";
+    if (h === 2) return "שעתיים";
+    return `${h} שעות`;
+  };
+  const heMins = m => {
+    if (m === 1) return "דקה";
+    if (m === 2) return "שתי דקות";
+    return `${m} דקות`;
+  };
+
+  if (!hours) return heMins(mins);
+  if (!mins)  return heHours(hours);
+  if (mins === 30) {
+    if (hours === 1) return "שעה וחצי";
+    if (hours === 2) return "שעתיים וחצי";
+    return `${heHours(hours)} וחצי`;
+  }
+  return `${heHours(hours)} ו-${heMins(mins)}`;
 }

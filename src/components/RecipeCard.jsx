@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
 import { useLanguage } from "../i18n";
+import { localizeTime } from "../lib/translate";
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
+function parseImagePos(str) {
+  const p = (str || "50% 50%").trim().split(/\s+/);
+  return { pos: `${p[0] || "50%"} ${p[1] || "50%"}`, scale: p[2] ? parseFloat(p[2]) : 1 };
+}
+
 export default function RecipeCard({ recipe, tags, onClick }) {
   const [hovered, setHovered] = useState(false);
-  const { tr, isRTL } = useLanguage();
+  const { tr, isRTL, lang } = useLanguage();
 
   const recipeTags = (recipe.tag_ids || [])
     .map((id) => tags.find((tg) => tg.id === id))
     .filter(Boolean);
 
   const accentColor = recipeTags[0]?.color || t.green;
+  const imgPos = parseImagePos(recipe.image_position);
 
   return (
     <div
@@ -48,7 +55,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
             .filter(s => s.v)
             .map((s, i) => (
             <div key={i} style={{ textAlign: "right" }}>
-              <div style={{ fontSize: "13px", color: t.inkMid, fontFamily: body }}>{s.v}</div>
+              <div style={{ fontSize: "13px", color: t.inkMid, fontFamily: body }}>{localizeTime(s.v, lang)}</div>
               <div style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.12em", textTransform: "uppercase" }}>{s.l}</div>
             </div>
           ))}
@@ -65,7 +72,7 @@ export default function RecipeCard({ recipe, tags, onClick }) {
             <img
               src={recipe.image_url}
               alt={recipe.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: recipe.image_position || "50% 50%" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: imgPos.pos, transform: imgPos.scale !== 1 ? `scale(${imgPos.scale})` : undefined, transformOrigin: "center" }}
             />
           </div>
         ) : (

@@ -13,6 +13,6 @@ export const t = {
   inkFaint: "#B5A898",
 };
 
-export const serif = "'EB Garamond', Georgia, 'Times New Roman', serif";
+export const serif = "'Open Sans', Calibri, sans-serif";
 export const sans = "'Outfit', sans-serif";
 export const body = "'Calibri Light', Calibri, 'Gill Sans MT', 'Trebuchet MS', sans-serif";

@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { t, serif, sans, body } from "../theme";
 import { useLanguage } from "../i18n";
+import { localizeTime } from "../lib/translate";
+
+function parseImagePos(str) {
+  const p = (str || "50% 50%").trim().split(/\s+/);
+  return { pos: `${p[0] || "50%"} ${p[1] || "50%"}`, scale: p[2] ? parseFloat(p[2]) : 1 };
+}
 import IngredientList from "./IngredientList";
 import StepList from "./StepList";
 import NoteList from "./NoteList";
@@ -117,7 +123,8 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
     .filter(Boolean);
 
   const accentColor = recipeTags[0]?.color || t.green;
-  const { tr } = useLanguage();
+  const { tr, lang } = useLanguage();
+  const imgPos = parseImagePos(recipe.image_position);
   const tabs = ["ingredients", "steps", "notes", "nutrition"];
 
   function toggleIngredient(i) {
@@ -200,7 +207,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
           <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "10px" }}>
             {recipe.image_url ? (
               <div style={{ width: "72px", height: "72px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: `2px solid ${accentColor}40` }}>
-                <img src={recipe.image_url} alt={recipe.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: recipe.image_position || "50% 50%" }} />
+                <img src={recipe.image_url} alt={recipe.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: imgPos.pos, transform: imgPos.scale !== 1 ? `scale(${imgPos.scale})` : undefined, transformOrigin: "center" }} />
               </div>
             ) : (
               <span style={{ fontSize: "56px", lineHeight: 1, flexShrink: 0, display: "flex", alignItems: "center", fontFamily: EMOJI_FONT }}>{recipe.emoji}</span>
@@ -218,7 +225,7 @@ export default function RecipeDetail({ recipe, tags, recipeCategories = [], isEd
             { l: tr("lbl_dose"), v: recipe.dose },
           ].filter((s) => s.v).map((s, i, arr) => (
             <div key={i} style={{ flex: "1 1 auto", padding: "10px 16px", borderRight: i < arr.length - 1 ? `1px solid ${t.border}` : `1px solid ${t.border}`, minWidth: "80px" }}>
-              <div style={{ fontSize: "14px", color: t.ink, fontFamily: body }}>{s.v}</div>
+              <div style={{ fontSize: "14px", color: t.ink, fontFamily: body }}>{localizeTime(s.v, lang)}</div>
               <div style={{ fontSize: "10px", color: t.inkFaint, fontFamily: sans, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: "3px" }}>{s.l}</div>
             </div>
           ))}

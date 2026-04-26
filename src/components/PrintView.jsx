@@ -1,5 +1,11 @@
 import { t, serif, sans } from "../theme";
 import { useLanguage } from "../i18n";
+import { localizeTime } from "../lib/translate";
+
+function parseImagePos(str) {
+  const p = (str || "50% 50%").trim().split(/\s+/);
+  return { pos: `${p[0] || "50%"} ${p[1] || "50%"}`, scale: p[2] ? parseFloat(p[2]) : 1 };
+}
 
 const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif";
 
@@ -24,11 +30,12 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
   const recipeTags = (recipe.tag_ids || []).map(id => tags.find(t => t.id === id)).filter(Boolean);
   const accentColor = recipeTags[0]?.color || "#6A9E82";
   const factor = scaleFactor || 1;
+  const imgPos = parseImagePos(recipe.image_position);
 
   const stats = [
-    { l: tr("lbl_prep"), v: recipe.prep_time },
-    { l: tr("lbl_cook"), v: recipe.cook_time },
-    { l: tr("lbl_total"), v: recipe.total_time },
+    { l: tr("lbl_prep"), v: localizeTime(recipe.prep_time, lang) },
+    { l: tr("lbl_cook"), v: localizeTime(recipe.cook_time, lang) },
+    { l: tr("lbl_total"), v: localizeTime(recipe.total_time, lang) },
     { l: tr("lbl_servings"), v: factor !== 1 ? `${Math.round((parseFloat(recipe.servings) || 1) * factor)}` : recipe.servings },
     { l: tr("lbl_dose"), v: recipe.dose },
   ].filter(s => s.v);
@@ -73,7 +80,7 @@ export default function PrintView({ recipe, tags, scaleFactor, onClose }) {
           <div style={{ display: "flex", gap: "20px", alignItems: "center", marginBottom: "16px" }}>
             {recipe.image_url ? (
               <div style={{ width: "72px", height: "72px", borderRadius: "50%", overflow: "hidden", flexShrink: 0, border: "3px solid rgba(255,255,255,0.15)" }}>
-                <img src={recipe.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: recipe.image_position || "50% 50%" }} />
+                <img src={recipe.image_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: imgPos.pos, transform: imgPos.scale !== 1 ? `scale(${imgPos.scale})` : undefined, transformOrigin: "center" }} />
               </div>
             ) : (
               <span style={{ fontSize: "64px", lineHeight: 1, fontFamily: EMOJI_FONT, flexShrink: 0 }}>{recipe.emoji}</span>

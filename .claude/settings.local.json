@@ -30,7 +30,11 @@
       "Bash(git commit -m 'chore: allow seed script and git commit bash commands in settings *)",
       "Bash(git push *)",
       "Bash(glab --version)",
-      "Bash(git --version)"
+      "Bash(git --version)",
+      "Bash(find \"C:/Users/PC/.claude\" -name \"*.json\" | sort)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(git commit *)"
     ]
   }
 }

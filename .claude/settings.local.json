@@ -34,7 +34,11 @@
       "Bash(find \"C:/Users/PC/.claude\" -name \"*.json\" | sort)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git rm *)",
+      "Bash(echo \".claude/worktrees/\")",
+      "PowerShell(git add .claude/settings.local.json)",
+      "PowerShell(git commit -m \"Allow git rm and echo worktrees path in local settings\")"
     ]
   }
 }
